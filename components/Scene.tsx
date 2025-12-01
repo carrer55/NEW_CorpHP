@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree, extend } from '@react-three/fiber';
 import { useScroll, Environment, Float, Sparkles, MeshTransmissionMaterial, shaderMaterial, ScrollControls, Scroll, Text3D, Center } from '@react-three/drei';
 import * as THREE from 'three';
@@ -82,39 +82,53 @@ const HeroComposition = () => {
     const sphereMatRef = useRef<any>(null);
     const scroll = useScroll();
     const { width, height } = useThree((state) => state.viewport);
-    const isMobile = width < 5;
+    const threeState = useThree(); // To access size (canvas pixel size) and camera
+    
+    // Increased threshold to better catch vertical mobile layouts/tablets
+    const isMobile = width < 6.0; 
     
     // Font URL for 3D Text
     const fontUrl = 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/fonts/helvetiker_bold.typeface.json';
 
     // Colors
-    // Match the text's icy tint initially (#eef2ff), transition to pure white (#ffffff)
     const initialColor = useMemo(() => new THREE.Color('#eef2ff'), []); 
     const targetColor = useMemo(() => new THREE.Color('#ffffff'), []);
 
-    // Responsive Configuration
-    const sphereStartScale = isMobile ? 0.14 : 0.20; 
-    const textSize = isMobile ? 0.28 : 0.9;
+    // --- Responsive Configuration ---
     
-    // Layout Calculations
-    const sphereRadius = sphereStartScale; 
-    const textApproxWidth = textSize * (isMobile ? 4.5 : 4.2); 
-    const gap = isMobile ? 0.15 : 0.5;
-    const totalWidth = (sphereRadius * 2) + gap + textApproxWidth;
+    // Size: Bigger sphere on mobile to look like a planet
+    const sphereStartScale = isMobile ? 0.45 : 0.20; 
     
-    const groupStartX = -totalWidth / 2;
-    const sphereStartX = groupStartX + sphereRadius;
-    const textStartX = groupStartX + (sphereRadius * 2) + gap + (textApproxWidth / 2);
-
-    const sphereStartY = isMobile ? -0.2 : -0.3;
-
+    // Text Size: Adjusted to ensure it fits on screen without cutoff
+    // Mobile: Scale relative to width to fill the screen (approx 0.18 factor for 5 chars)
+    const textSize = isMobile ? width * 0.18 : 0.9;
+    
+    // --- Layout Calculations ---
+    
+    // Desktop: Horizontal Layout
+    const desktopSphereRadius = 0.20;
+    const desktopTextApproxWidth = 0.9 * 4.2;
+    const desktopGap = 0.5;
+    const desktopTotalWidth = (desktopSphereRadius * 2) + desktopGap + desktopTextApproxWidth;
+    
+    const desktopGroupStartX = -desktopTotalWidth / 2;
+    const desktopSphereStartX = desktopGroupStartX + desktopSphereRadius;
+    const desktopTextStartX = desktopGroupStartX + (desktopSphereRadius * 2) + desktopGap + (desktopTextApproxWidth / 2);
+    
+    // Mobile: Vertical Layout (Sphere Top, Text Bottom)
+    // Lowered to 0.7 to move elements down on screen
+    const mobileSphereStartY = 0.7; 
+    // Calculate Text Position based on Sphere
+    // Gap 0.4 maintained
+    const mobileTextY = mobileSphereStartY - 0.45 - 0.4; 
+    
     // Unified Crystal Material Settings (Performance Optimized)
     const crystalMaterialProps = {
-        samples: isMobile ? 3 : 5, // Reduced from 4/8
-        resolution: isMobile ? 256 : 512, // Reduced from 512/1024
+        samples: isMobile ? 3 : 5, 
+        resolution: isMobile ? 256 : 512,
         thickness: isMobile ? 1.0 : 1.5,
         chromaticAberration: 1.0, 
-        anisotropy: 0.1, // Reduced from 0.5
+        anisotropy: 0.1, 
         distortion: 0.2, 
         distortionScale: 0.4,
         temporalDistortion: 0.15, 
@@ -126,28 +140,68 @@ const HeroComposition = () => {
         background: new THREE.Color('#000000'),
         toneMapped: false,
     };
-
+    
     useFrame((state) => {
         const range = scroll.range(0, 0.25);
         const ease = THREE.MathUtils.smoothstep(range, 0, 1);
         const aggressiveEase = Math.pow(ease, 3);
-
         const time = state.clock.elapsedTime;
         
         if (sphereRef.current) {
-            // 1. Position: Move Sphere towards the Text horizontally
-            const currentX = THREE.MathUtils.lerp(sphereStartX, textStartX, ease);
-            const currentY = THREE.MathUtils.lerp(sphereStartY, 0, aggressiveEase);
-            const currentZ = THREE.MathUtils.lerp(0, 0.5, aggressiveEase);
+            if (isMobile) {
+                // Mobile Animation: "Swallow & Converge"
+                
+                // Phase 1: Growth & Descent to Text (0.0 -> 0.15)
+                // Starts immediately, hits the text position quickly
+                const phase1 = scroll.range(0, 0.15);
+                
+                // Phase 2: Converge into Arrow (0.15 -> 0.30)
+                // Sucks down into the scroll arrow
+                const phase2 = scroll.range(0.15, 0.15);
+                
+                const startY = mobileSphereStartY;
+                const textY = mobileTextY;
+                // Target the "SCROLL" arrow position (approx bottom of screen)
+                // -height/2 is bottom edge. +0.5 puts it roughly at the arrow icon position.
+                const arrowY = -height / 2 + 0.5;
 
-            sphereRef.current.position.set(currentX, currentY, currentZ);
+                const startScale = sphereStartScale;
+                const maxScale = 2.5; // Large size when at text
+                const endScale = 0.0; // Disappear into arrow
 
-            // 2. Scale
-            const targetScale = isMobile ? 3.5 : 2.5; 
-            const currentScale = THREE.MathUtils.lerp(sphereStartScale, targetScale, aggressiveEase);
-            sphereRef.current.scale.setScalar(currentScale);
+                let targetY, targetScale, targetZ;
 
-            // 3. Rotation
+                if (phase2 > 0) {
+                    // Phase 2: Text Position -> Arrow Position (Suction)
+                    const p2Ease = Math.pow(phase2, 2); // Accelerate into the arrow
+                    targetY = THREE.MathUtils.lerp(textY, arrowY, p2Ease);
+                    targetScale = THREE.MathUtils.lerp(maxScale, endScale, p2Ease);
+                    targetZ = THREE.MathUtils.lerp(2.0, 0, p2Ease); // Move back to screen plane
+                } else {
+                    // Phase 1: Start -> Text Position (Growth)
+                    const p1Ease = THREE.MathUtils.smoothstep(phase1, 0, 1);
+                    targetY = THREE.MathUtils.lerp(startY, textY, p1Ease);
+                    targetScale = THREE.MathUtils.lerp(startScale, maxScale, p1Ease);
+                    targetZ = THREE.MathUtils.lerp(0, 2.0, p1Ease); // Pop out towards camera
+                }
+                
+                sphereRef.current.position.set(0, targetY, targetZ);
+                sphereRef.current.scale.setScalar(targetScale);
+
+            } else {
+                // Desktop Animation: Move Sphere towards the Text horizontally
+                const currentX = THREE.MathUtils.lerp(desktopSphereStartX, desktopTextStartX, ease);
+                const currentY = THREE.MathUtils.lerp(-0.3, 0, aggressiveEase);
+                const currentZ = THREE.MathUtils.lerp(0, 0.5, aggressiveEase);
+                sphereRef.current.position.set(currentX, currentY, currentZ);
+
+                // Scale
+                const targetScale = 2.5; 
+                const currentScale = THREE.MathUtils.lerp(sphereStartScale, targetScale, aggressiveEase);
+                sphereRef.current.scale.setScalar(currentScale);
+            }
+
+            // Rotation
             sphereRef.current.rotation.x = time * 0.3 + ease * Math.PI;
             sphereRef.current.rotation.y = time * 0.4 + ease * Math.PI * 2;
             sphereRef.current.rotation.z = ease * Math.PI * 0.5; 
@@ -155,22 +209,33 @@ const HeroComposition = () => {
         
         // Material Metamorphosis
         if (sphereMatRef.current) {
-            // Color Lerp
             sphereMatRef.current.color.lerpColors(initialColor, targetColor, ease);
-            
-            // Dynamic Material Properties
             sphereMatRef.current.distortion = THREE.MathUtils.lerp(crystalMaterialProps.distortion, 0.6, ease);
             sphereMatRef.current.temporalDistortion = THREE.MathUtils.lerp(crystalMaterialProps.temporalDistortion, 0.4, ease);
             sphereMatRef.current.roughness = THREE.MathUtils.lerp(crystalMaterialProps.roughness, 0.05, ease);
         }
         
         if (textGroupRef.current) {
-             textGroupRef.current.position.set(textStartX, 0, 0);
-             const textScale = THREE.MathUtils.lerp(1, 0, Math.pow(ease, 2));
-             textGroupRef.current.scale.setScalar(textScale);
-             textGroupRef.current.rotation.y = -ease * Math.PI;
-             textGroupRef.current.position.z = THREE.MathUtils.lerp(0, -1, ease);
-             textGroupRef.current.rotation.x = Math.sin(time * 0.5) * 0.05 * (1 - ease);
+             if (isMobile) {
+                 // Mobile: Fixed World Position
+                 textGroupRef.current.position.set(0, mobileTextY, 0);
+                 
+                 // Text gets "swallowed" exactly when sphere reaches max size (Phase 2 start)
+                 const swallowProgress = THREE.MathUtils.smoothstep(scroll.range(0.12, 0.08), 0, 1);
+                 
+                 // Scale factor: Base scale * (1 - swallow)
+                 textGroupRef.current.scale.setScalar(1 - swallowProgress); 
+                 textGroupRef.current.rotation.set(0, 0, 0);
+
+             } else {
+                 // Desktop: Text animation (Collapse/Disappear)
+                 textGroupRef.current.position.set(desktopTextStartX, 0, 0);
+                 const textScale = THREE.MathUtils.lerp(1, 0, Math.pow(ease, 2));
+                 textGroupRef.current.scale.setScalar(textScale);
+                 textGroupRef.current.rotation.y = -ease * Math.PI;
+                 textGroupRef.current.position.z = THREE.MathUtils.lerp(0, -1, ease);
+                 textGroupRef.current.rotation.x = Math.sin(time * 0.5) * 0.05 * (1 - ease);
+             }
         }
     });
 
@@ -179,12 +244,16 @@ const HeroComposition = () => {
             <MovingLight />
             <Float 
                 speed={1.5} 
-                rotationIntensity={isMobile ? 0.05 : 0.1} 
-                floatIntensity={isMobile ? 0.1 : 0.2} 
-                floatingRange={[-0.1, 0.1]}
+                rotationIntensity={isMobile ? 0.02 : 0.1} // Reduced rotation on mobile for readability
+                floatIntensity={isMobile ? 0.05 : 0.2} // Reduced float on mobile
+                floatingRange={[-0.05, 0.05]}
             >
-                {/* The Sphere - Optimized Geometry */}
-                <mesh ref={sphereRef} position={[sphereStartX, sphereStartY, 0]}>
+                {/* The Sphere */}
+                <mesh 
+                    ref={sphereRef} 
+                    position={isMobile ? [0, mobileSphereStartY, 0] : [desktopSphereStartX, -0.3, 0]}
+                    // Render order important for transparency
+                >
                     <sphereGeometry args={[1, 32, 32]} />
                     <MeshTransmissionMaterial 
                         ref={sphereMatRef} 
@@ -192,8 +261,12 @@ const HeroComposition = () => {
                     />
                 </mesh>
 
-                {/* The Text - Optimized Geometry */}
-                <group ref={textGroupRef} position={[textStartX, 0, 0]}>
+                {/* The Text */}
+                <group 
+                    ref={textGroupRef} 
+                    // Initial position
+                    position={isMobile ? [0, mobileTextY, 0] : [desktopTextStartX, 0, 0]}
+                >
                     <spotLight position={[0, 2, 5]} intensity={30} color="#ffffff" angle={0.6} penumbra={0.5} distance={10} />
                     <spotLight position={[5, 0, -5]} intensity={40} color="#a0e0ff" angle={0.8} penumbra={1} distance={10} />
                     
@@ -201,11 +274,11 @@ const HeroComposition = () => {
                         <Text3D 
                             font={fontUrl} 
                             size={textSize} 
-                            height={0.2} 
+                            height={isMobile ? 0.05 : 0.2} 
                             curveSegments={12}
                             bevelEnabled
-                            bevelThickness={0.04} 
-                            bevelSize={0.015}
+                            bevelThickness={isMobile ? 0.01 : 0.04} 
+                            bevelSize={isMobile ? 0.005 : 0.015}
                             bevelOffset={0}
                             bevelSegments={3}
                             letterSpacing={-0.03}
@@ -227,7 +300,7 @@ const HeroComposition = () => {
 const PrismaticArtifact = () => {
     const groupRef = useRef<THREE.Group>(null);
     const { height, width } = useThree((state) => state.viewport);
-    const isMobile = width < 5;
+    const isMobile = width < 6.0;
 
     useFrame((state) => {
         if (groupRef.current) {
@@ -238,7 +311,7 @@ const PrismaticArtifact = () => {
 
     return (
         <group position={[isMobile ? 0 : -2.5, -height * 2, 0]} ref={groupRef}>
-            <mesh scale={isMobile ? 1.8 : 2.2}>
+            <mesh scale={isMobile ? 1.5 : 2.2}>
                 <icosahedronGeometry args={[1, 0]} />
                 <MeshTransmissionMaterial 
                     backside
@@ -260,9 +333,9 @@ const KineticGrid = () => {
     const meshRef = useRef<THREE.InstancedMesh>(null);
     const { height, width } = useThree((state) => state.viewport);
     const scroll = useScroll();
-    const isMobile = width < 5;
+    const isMobile = width < 6.0;
 
-    const count = isMobile ? 10 : 16;
+    const count = isMobile ? 8 : 16; // Reduce count for mobile performance
     const total = count * count;
     const dummy = useMemo(() => new THREE.Object3D(), []);
     const color = useMemo(() => new THREE.Color(), []);
@@ -276,7 +349,7 @@ const KineticGrid = () => {
         let i = 0;
         for (let x = 0; x < count; x++) {
             for (let z = 0; z < count; z++) {
-                const sep = isMobile ? 0.4 : 0.5;
+                const sep = isMobile ? 0.6 : 0.5;
                 const xPos = (x - count / 2) * sep;
                 const zPos = (z - count / 2) * sep;
                 const dist = Math.sqrt(xPos * xPos + zPos * zPos);
@@ -314,8 +387,8 @@ const KineticGrid = () => {
 const Singularity = () => {
     const blackHoleRef = useRef<THREE.Mesh>(null);
     const { height, width } = useThree((state) => state.viewport);
-    const isMobile = width < 5;
-    const particleCount = isMobile ? 2000 : 3500; // Optimized
+    const isMobile = width < 6.0;
+    const particleCount = isMobile ? 1500 : 3500; // Further optimized for mobile
     
     const { positions, colors } = useMemo(() => {
         const positions = new Float32Array(particleCount * 3);
@@ -380,9 +453,30 @@ const CameraRig = () => {
             state.camera.position.x += (Math.random() - 0.5) * 0.02;
             state.camera.position.z += (Math.random() - 0.5) * 0.02;
         } else {
+             // Force center X strongly to avoid drifting on mobile resize
              state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, 0, 0.1);
         }
     });
+    return null;
+}
+
+// --- Scroll Snap Helper ---
+const ScrollSnapHandler = () => {
+    const scroll = useScroll();
+    const { width } = useThree((state) => state.viewport);
+    const isMobile = width < 6.0;
+
+    useEffect(() => {
+        if (scroll.el && isMobile) {
+            // Enforce scroll snapping on mobile
+            scroll.el.style.scrollSnapType = 'y mandatory';
+            // Optional: scrollBehavior smooth can conflict with damping, so we rely on CSS snap.
+            // R3F ScrollControls usually creates a div with overflow-y: auto.
+        } else if (scroll.el) {
+            scroll.el.style.scrollSnapType = '';
+        }
+    }, [scroll.el, isMobile]);
+
     return null;
 }
 
@@ -390,10 +484,11 @@ const CameraRig = () => {
 
 export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => void }) => {
     const { height, width } = useThree((state) => state.viewport);
-    const isMobile = width < 5;
+    const isMobile = width < 6.0;
 
     return (
         <ScrollControls pages={6} damping={0.2}>
+            <ScrollSnapHandler />
             <CameraRig />
             
             {/* Hero Composition: .FOUND */}

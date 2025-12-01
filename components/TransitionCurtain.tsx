@@ -9,7 +9,7 @@ interface TransitionCurtainProps {
 }
 
 // Custom easing for an ultra-premium "liquid" feel (EaseInOutQuart)
-const TRANSITION_EASE = [0.76, 0, 0.24, 1];
+const TRANSITION_EASE: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
 export const TransitionCurtain: React.FC<TransitionCurtainProps> = ({ isVisible, targetView }) => {
     // Format the view name for display (e.g., PRIVACY_POLICY -> PRIVACY POLICY)

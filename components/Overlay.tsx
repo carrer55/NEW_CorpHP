@@ -7,7 +7,7 @@ import { PrivacyPolicyPage } from './ContentPages';
 
 const Section = ({ children, className = "" }: { children?: React.ReactNode, className?: string }) => {
     return (
-        <section className={`h-screen w-screen p-6 md:p-20 flex flex-col justify-center ${className}`}>
+        <section className={`h-screen w-screen p-6 md:p-20 flex flex-col justify-center snap-start snap-always ${className}`}>
             {children}
         </section>
     );
@@ -23,10 +23,12 @@ export const Overlay: React.FC<OverlayProps> = ({ onNavigate }) => {
     return (
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
             {/* Section 1: Hero */}
-            <Section className="items-center justify-center z-10 text-center">
-                <div className="max-w-5xl flex flex-col items-center mt-32 md:mt-40">
+            <Section className="items-center justify-center z-10 text-center relative">
+                {/* Mobile: Center alignment to sit just below the 3D text (which ends slightly above center) */}
+                <div className="w-full h-full flex flex-col items-center justify-center pt-32 md:pt-0 md:mt-40">
                     {/* Title is now 3D in the scene */}
                     <motion.p 
+                        id="hero-slogan-anchor"
                         className="text-base text-gray-300 leading-relaxed max-w-lg mx-auto"
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
@@ -58,7 +60,7 @@ export const Overlay: React.FC<OverlayProps> = ({ onNavigate }) => {
                         whileInView={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8 }}
                     >
-                        <h2 className="text-4xl sm:text-5xl md:text-8xl font-display font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white to-transparent opacity-80 leading-none tracking-tighter">
+                        <h2 className="text-5xl sm:text-6xl md:text-8xl font-display font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white to-transparent opacity-80 leading-none tracking-tighter">
                             OUR
                             <br />
                             PRODUCTS
@@ -87,7 +89,7 @@ export const Overlay: React.FC<OverlayProps> = ({ onNavigate }) => {
                         transition={{ duration: 1 }}
                     >
                         <div className="text-xs font-mono text-cyan-300 mb-2 tracking-widest">CORE OF THINKING</div>
-                        <h2 className="text-4xl sm:text-5xl md:text-8xl font-display font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white to-transparent opacity-80 leading-none tracking-tighter">
+                        <h2 className="text-5xl sm:text-6xl md:text-8xl font-display font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white to-transparent opacity-80 leading-none tracking-tighter">
                             OUR
                             <br />
                             PHILOSOPHY
@@ -102,19 +104,19 @@ export const Overlay: React.FC<OverlayProps> = ({ onNavigate }) => {
             </Section>
 
             {/* Section 4: Kinetic Grid (Now Vision) */}
-            <Section className="items-center md:items-start">
+            <Section className="items-center justify-center">
                  <div className="max-w-5xl relative pointer-events-auto" data-hover>
                     <motion.div
                          initial={{ opacity: 0, scale: 0.95 }}
                          whileInView={{ opacity: 1, scale: 1 }}
                          transition={{ duration: 0.8 }}
                     >
-                        <h2 className="text-4xl sm:text-5xl md:text-8xl font-display font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white to-transparent opacity-80 leading-none tracking-tighter">
+                        <h2 className="text-5xl sm:text-6xl md:text-8xl font-display font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-b from-white to-transparent opacity-80 leading-none tracking-tighter">
                             OUR
                             <br />
                             VISION
                         </h2>
-                        <div className="flex flex-col md:flex-row gap-8 border-l-2 border-[#ff00ff] pl-6 mt-32 md:mt-64">
+                        <div className="flex flex-col md:flex-row gap-8 border-l-2 border-[#ff00ff] pl-6 mt-8 md:mt-16">
                             <div className="text-gray-300 leading-relaxed max-w-3xl text-sm md:text-base">
                                 <strong className="block mb-4 text-white text-base md:text-lg">【VISION】自分らしく働く喜びに満ちた未来を創る</strong>
                                 <p>私たちは、働くという営みのあらゆる場面で一人ひとりが持つ無限の可能性を見つけ出し、それぞれが自分のいる場所で精一杯輝けるよう支援します。一つの小さな「点」から始まる物語が、隣の人へ、そして社会全体へと広がり、やがて世界中の人々の働く喜びを照らし出す——そんな未来を実現します。</p>
@@ -133,9 +135,12 @@ export const Overlay: React.FC<OverlayProps> = ({ onNavigate }) => {
                         transition={{ duration: 1.5, ease: "circOut" }}
                      >
                         <div className="text-xs font-mono text-red-500 mb-6 tracking-widest uppercase">A Small Yet Profound Beginning</div>
-                        <h2 className="text-2xl sm:text-3xl md:text-6xl font-display font-bold text-white mb-8 tracking-tight drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-                            「 . The Dot 」<br />── その小さくて大きな挑戦
+                        <h2 className="text-5xl sm:text-6xl md:text-8xl font-display font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-b from-white to-transparent opacity-80 leading-none tracking-tighter">
+                            「 . The Dot 」
                         </h2>
+                        <div className="text-lg md:text-2xl font-bold text-white mb-8 tracking-widest opacity-90">
+                            ── その小さくて大きな挑戦
+                        </div>
                         <p className="text-gray-200 opacity-90 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
                             私たちの社名に刻まれた「 . 」は、「人を中心とした、<br />つながりと可能性の起点」を表しています。
                         </p>
@@ -156,7 +161,8 @@ export const Overlay: React.FC<OverlayProps> = ({ onNavigate }) => {
                     </h2>
                     <p className="text-gray-300 leading-relaxed text-sm md:text-base mb-12 max-w-2xl mx-auto">
                         一つの小さな点から、大きな波が生まれている。<br />
-                        一人の小さな輝きが、今この瞬間も誰かの人生を変えている。
+                        一人の小さな輝きが、<br />
+                        今この瞬間も誰かの人生を変えている。
                     </p>
                 </motion.div>
 

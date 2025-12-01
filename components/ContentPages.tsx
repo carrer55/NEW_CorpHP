@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { ViewState } from '../types';
 
@@ -7,7 +7,7 @@ const FORM_ENDPOINT = "https://formspree.io/f/xeobddbo";
 
 // Updated container variants for a more "cinematic" and subtle entry
 // Now uses a very gentle fade-up that feels like "settling" after the curtain rises
-const containerVariants = {
+const containerVariants: Variants = {
     hidden: { 
         opacity: 0, 
         y: 30, // Slight upward movement
@@ -19,7 +19,7 @@ const containerVariants = {
         filter: "blur(0px)",
         transition: { 
             duration: 1.0, // Long duration for smoothness
-            ease: [0.25, 1, 0.5, 1], // Soft easing (Quart-like)
+            ease: [0.25, 1, 0.5, 1] as [number, number, number, number], // Soft easing (Quart-like)
             staggerChildren: 0.05, 
             delayChildren: 0.2 // Wait for curtain to clear a bit
         }
@@ -32,7 +32,7 @@ const containerVariants = {
     }
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: { 
         y: 0, 
