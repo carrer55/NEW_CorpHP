@@ -8,7 +8,22 @@ import { AnimatePresence } from 'framer-motion';
 import { Navbar } from './components/Navbar';
 import { TransitionCurtain } from './components/TransitionCurtain';
 import { ContentPages } from './components/ContentPages';
+import { MobileSwipeScroll } from './components/MobileSwipeScroll';
 import { ViewState } from './types';
+
+// Custom hook for mobile detection
+const useIsMobile = () => {
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+    return isMobile;
+};
 
 const App = () => {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -16,6 +31,7 @@ const App = () => {
     const [targetView, setTargetView] = useState<ViewState>('HOME'); // Track target for transition text
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [isCanvasVisible, setIsCanvasVisible] = useState(true); // New state to control Canvas visibility
+    const isMobile = useIsMobile();
 
     // Simulate initial asset loading
     useEffect(() => {
@@ -69,19 +85,26 @@ const App = () => {
                 {view !== 'HOME' && <ContentPages view={view} onNavigate={handleNavigate} key="content" />}
             </AnimatePresence>
 
-            {/* Wrap Canvas in a transition div to handle the blackout smoothly */}
-            <div className={`absolute inset-0 z-0 transition-opacity duration-75 ${isCanvasVisible ? 'opacity-100' : 'opacity-0'}`}>
-                <Canvas
-                    dpr={[1, 2]}
-                    camera={{ position: [0, 0, 5], fov: 45 }}
-                    gl={{ antialias: true, alpha: false }}
-                    className="w-full h-full"
-                >
-                    <Suspense fallback={null}>
-                        <SceneWrapper mode={view === 'HOME' ? 'HOME' : 'AMBIENT'} onNavigate={handleNavigate} />
-                    </Suspense>
-                </Canvas>
-            </div>
+            {/* Mobile Home View: Render special SwipeScroll component instead of main Canvas */}
+            {view === 'HOME' && isMobile ? (
+                <div className={`absolute inset-0 z-0 transition-opacity duration-75 ${isCanvasVisible ? 'opacity-100' : 'opacity-0'}`}>
+                    <MobileSwipeScroll onNavigate={handleNavigate} />
+                </div>
+            ) : (
+                /* Desktop Home View & Other Views: Main Canvas */
+                <div className={`absolute inset-0 z-0 transition-opacity duration-75 ${isCanvasVisible ? 'opacity-100' : 'opacity-0'}`}>
+                    <Canvas
+                        dpr={[1, 2]}
+                        camera={{ position: [0, 0, 5], fov: 45 }}
+                        gl={{ antialias: true, alpha: false }}
+                        className="w-full h-full"
+                    >
+                        <Suspense fallback={null}>
+                            <SceneWrapper mode={view === 'HOME' ? 'HOME' : 'AMBIENT'} onNavigate={handleNavigate} />
+                        </Suspense>
+                    </Canvas>
+                </div>
+            )}
         </div>
     );
 };

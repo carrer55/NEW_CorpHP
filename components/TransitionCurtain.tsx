@@ -30,16 +30,18 @@ export const TransitionCurtain: React.FC<TransitionCurtainProps> = ({ isVisible,
                         className="fixed inset-0 z-[200] bg-[#0a0a0a] pointer-events-none" // Neutral 950
                         initial={{ clipPath: "polygon(0 100%, 100% 100%, 100% 100%, 0 100%)" }}
                         animate={{ clipPath: "polygon(0 0%, 100% 0%, 100% 100%, 0 100%)" }}
-                        exit={{ clipPath: "polygon(0 0%, 100% 0%, 100% 0%, 0 0%)" }}
+                        exit={{ 
+                            clipPath: "polygon(0 0%, 100% 0%, 100% 0%, 0 0%)",
+                            transition: {
+                                duration: 0.9,
+                                ease: TRANSITION_EASE,
+                                delay: 0.2 // Exit: Last
+                            }
+                        }}
                         transition={{ 
                             duration: 0.9,
                             ease: TRANSITION_EASE,
                             delay: 0, // Enter: First
-                        }}
-                        exitTransition={{
-                            duration: 0.9,
-                            ease: TRANSITION_EASE,
-                            delay: 0.2 // Exit: Last
                         }}
                     />
 
@@ -48,16 +50,18 @@ export const TransitionCurtain: React.FC<TransitionCurtainProps> = ({ isVisible,
                         className="fixed inset-0 z-[201] bg-[#171717] pointer-events-none" // Neutral 900
                         initial={{ clipPath: "polygon(0 100%, 100% 100%, 100% 100%, 0 100%)" }}
                         animate={{ clipPath: "polygon(0 0%, 100% 0%, 100% 100%, 0 100%)" }}
-                        exit={{ clipPath: "polygon(0 0%, 100% 0%, 100% 0%, 0 0%)" }}
+                        exit={{ 
+                            clipPath: "polygon(0 0%, 100% 0%, 100% 0%, 0 0%)",
+                            transition: {
+                                duration: 0.9,
+                                ease: TRANSITION_EASE,
+                                delay: 0.1 // Exit: Second
+                            }
+                        }}
                         transition={{ 
                             duration: 0.9,
                             ease: TRANSITION_EASE,
                             delay: 0.05, // Enter: Second
-                        }}
-                        exitTransition={{
-                            duration: 0.9,
-                            ease: TRANSITION_EASE,
-                            delay: 0.1 // Exit: Second
                         }}
                     />
 
@@ -66,16 +70,18 @@ export const TransitionCurtain: React.FC<TransitionCurtainProps> = ({ isVisible,
                         className="fixed inset-0 z-[202] bg-[#050505] pointer-events-none flex items-center justify-center overflow-hidden border-t border-white/10"
                         initial={{ clipPath: "polygon(0 100%, 100% 100%, 100% 100%, 0 100%)" }}
                         animate={{ clipPath: "polygon(0 0%, 100% 0%, 100% 100%, 0 100%)" }}
-                        exit={{ clipPath: "polygon(0 0%, 100% 0%, 100% 0%, 0 0%)" }}
+                        exit={{ 
+                            clipPath: "polygon(0 0%, 100% 0%, 100% 0%, 0 0%)",
+                            transition: {
+                                duration: 0.9,
+                                ease: TRANSITION_EASE,
+                                delay: 0 // Exit: First (Reveals layers behind)
+                            }
+                        }}
                         transition={{ 
                             duration: 0.9, 
                             ease: TRANSITION_EASE,
                             delay: 0.1 // Enter: Last (Covers everything)
-                        }}
-                        exitTransition={{
-                            duration: 0.9,
-                            ease: TRANSITION_EASE,
-                            delay: 0 // Exit: First (Reveals layers behind)
                         }}
                     >
                         {/* --- Internal Content --- */}
