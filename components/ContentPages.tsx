@@ -657,8 +657,9 @@ ${formData.message}`;
 
 export const ContentPages: React.FC<{ view: ViewState; onNavigate: (view: ViewState) => void }> = ({ view, onNavigate }) => {
     return (
-        <div className="absolute inset-0 z-20 pointer-events-none overflow-y-auto">
-            <div className="pointer-events-auto min-h-full">
+        // Changed pointer-events-none to pointer-events-auto to ensure scroll events are captured on mobile
+        <div className="absolute inset-0 z-20 pointer-events-auto overflow-y-auto overscroll-contain">
+            <div className="min-h-full">
                 {view === 'PRODUCT' && <ProjectsPage onNavigate={onNavigate} />}
                 {view === 'ABOUT_US' && <AboutPage onNavigate={onNavigate} />}
                 {view === 'CONTACT' && <ContactPage onNavigate={onNavigate} />}

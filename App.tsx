@@ -13,12 +13,19 @@ import { ViewState } from './types';
 
 // Custom hook for mobile detection
 const useIsMobile = () => {
-    const [isMobile, setIsMobile] = useState(false);
+    // Initialize with correct value to avoid flash of content/cursor
+    const [isMobile, setIsMobile] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return window.innerWidth <= 768;
+        }
+        return false;
+    });
+
     useEffect(() => {
         const checkMobile = () => {
             setIsMobile(window.innerWidth <= 768);
         };
-        checkMobile();
+        // Add listener
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
@@ -31,6 +38,7 @@ const App = () => {
     const [targetView, setTargetView] = useState<ViewState>('HOME'); // Track target for transition text
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [isCanvasVisible, setIsCanvasVisible] = useState(true); // New state to control Canvas visibility
+    const [resetKey, setResetKey] = useState(0); // Key to force re-mount of Home scene/scroll
     const isMobile = useIsMobile();
 
     // Simulate initial asset loading
@@ -40,7 +48,9 @@ const App = () => {
     }, []);
 
     const handleNavigate = (newView: ViewState) => {
-        if (newView === view || isTransitioning) return;
+        // Allow navigation if different view OR if same view is HOME (to reset/reload)
+        if (isTransitioning) return;
+        if (newView === view && newView !== 'HOME') return;
         
         setTargetView(newView);
         setIsTransitioning(true);
@@ -54,7 +64,12 @@ const App = () => {
             // appearing while the new scene mounts or renders its first frame.
             setIsCanvasVisible(false);
 
-            setView(newView);
+            if (newView === view) {
+                // If staying on same view (HOME reset), force remount by changing key
+                setResetKey(prev => prev + 1);
+            } else {
+                setView(newView);
+            }
             
             // 2. Buffer to ensure DOM updates and 3D scenes allow for a frame to render while hidden.
             // Increased buffer slightly to accommodate heavier pages like Privacy Policy.
@@ -69,9 +84,11 @@ const App = () => {
     };
 
     return (
-        <div className="w-full h-screen bg-[#050505] text-white overflow-hidden cursor-none relative">
+        <div className={`w-full h-screen bg-[#050505] text-white overflow-hidden relative ${isMobile ? '' : 'cursor-none'}`}>
             <GrainOverlay />
-            <CustomCursor />
+            
+            {/* Only show custom cursor on non-mobile devices */}
+            {!isMobile && <CustomCursor />}
             
             <AnimatePresence>
                 {!isLoaded && <Loader key="loader" />}
@@ -88,7 +105,7 @@ const App = () => {
             {/* Mobile Home View: Render special SwipeScroll component instead of main Canvas */}
             {view === 'HOME' && isMobile ? (
                 <div className={`absolute inset-0 z-0 transition-opacity duration-75 ${isCanvasVisible ? 'opacity-100' : 'opacity-0'}`}>
-                    <MobileSwipeScroll onNavigate={handleNavigate} />
+                    <MobileSwipeScroll key={`mobile-home-${resetKey}`} onNavigate={handleNavigate} />
                 </div>
             ) : (
                 /* Desktop Home View & Other Views: Main Canvas */
@@ -100,7 +117,11 @@ const App = () => {
                         className="w-full h-full"
                     >
                         <Suspense fallback={null}>
-                            <SceneWrapper mode={view === 'HOME' ? 'HOME' : 'AMBIENT'} onNavigate={handleNavigate} />
+                            <SceneWrapper 
+                                key={`scene-${view}-${resetKey}`} 
+                                mode={view === 'HOME' ? 'HOME' : 'AMBIENT'} 
+                                onNavigate={handleNavigate} 
+                            />
                         </Suspense>
                     </Canvas>
                 </div>

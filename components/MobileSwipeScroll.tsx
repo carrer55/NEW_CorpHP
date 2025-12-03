@@ -22,7 +22,7 @@ const MobileHero: React.FC<MobileHeroProps> = ({ isExiting }) => {
     const sphereRef = useRef<THREE.Mesh>(null);
     const sphereMatRef = useRef<any>(null);
     const textMatRef = useRef<any>(null);
-    const warpGroupRef = useRef<THREE.Group>(null); // For background warp effect
+    const warpGroupRef = useRef<THREE.Group>(null);
 
     // Initial Positions
     const sphereBaseY = 0.5; 
@@ -50,77 +50,62 @@ const MobileHero: React.FC<MobileHeroProps> = ({ isExiting }) => {
 
     useFrame((state, delta) => {
         const time = state.clock.elapsedTime;
-        // High speed transition
-        const lerpSpeed = delta * 8.0; 
-
+        
         if (sphereRef.current && groupRef.current) {
-            // --- Animation Logic ---
+            
             if (isExiting) {
-                // === WARP SINGULARITY MODE ===
+                // === EXIT: PORTAL ASCENSION ===
+                // Speed tuned for 1000ms transition
+                const exitSpeed = delta * 2.0;
 
-                // 1. Sphere: Evolves into a White Hole Portal
-                // Expand massively to swallow camera
-                sphereRef.current.scale.lerp(new THREE.Vector3(12, 12, 12), lerpSpeed * 0.4);
-                // Move towards camera
-                sphereRef.current.position.lerp(new THREE.Vector3(0, 0, 2), lerpSpeed * 0.4);
-                // Rotate wildly
-                sphereRef.current.rotation.z += delta * 2.0;
-
-                // Material Chaos: Maximum distortion and turn white
+                // 1. Sphere: Expands to cover screen
+                sphereRef.current.scale.lerp(new THREE.Vector3(15, 15, 15), exitSpeed);
+                // Move closer
+                sphereRef.current.position.lerp(new THREE.Vector3(0, 0, 3), exitSpeed);
+                
+                // Material goes pure white
                 if (sphereMatRef.current) {
-                    sphereMatRef.current.distortion = THREE.MathUtils.lerp(sphereMatRef.current.distortion, 8.0, lerpSpeed);
-                    sphereMatRef.current.chromaticAberration = THREE.MathUtils.lerp(sphereMatRef.current.chromaticAberration, 10.0, lerpSpeed);
-                    sphereMatRef.current.thickness = THREE.MathUtils.lerp(sphereMatRef.current.thickness, 5.0, lerpSpeed);
-                    // Fade color to pure light
-                    sphereMatRef.current.color.lerp(new THREE.Color('#ffffff'), lerpSpeed);
+                    sphereMatRef.current.color.lerp(new THREE.Color('#ffffff'), exitSpeed);
+                    sphereMatRef.current.roughness = THREE.MathUtils.lerp(sphereMatRef.current.roughness, 0, exitSpeed);
+                    sphereMatRef.current.thickness = THREE.MathUtils.lerp(sphereMatRef.current.thickness, 5.0, exitSpeed);
                 }
 
-                // 2. Text: Spaghettification (Sucked into singularity)
-                // Stretch Z axis infinitely, Shrink X/Y to zero
-                groupRef.current.scale.lerp(new THREE.Vector3(0, 0, 10), lerpSpeed);
-                // Move deep into the sphere (negative Z relative to camera, but sphere is behind)
-                // Actually pull it backwards away from camera into the sphere
-                groupRef.current.position.lerp(new THREE.Vector3(0, 0, -5), lerpSpeed);
-                // Hyper spin
-                groupRef.current.rotation.z += delta * 15;
+                // 2. Text: Fade out instantly
+                if (textMatRef.current) {
+                    textMatRef.current.opacity = THREE.MathUtils.lerp(textMatRef.current.opacity, 0, exitSpeed * 2);
+                }
 
-                // 3. Background Warp: Stretch the stars into lines
+                // 3. Warp Stars
                 if (warpGroupRef.current) {
-                    // Scale the container along Z to stretch sparkles into lines
-                    warpGroupRef.current.scale.z = THREE.MathUtils.lerp(warpGroupRef.current.scale.z, 20, lerpSpeed);
-                    // Move them towards camera to simulate speed
-                    warpGroupRef.current.position.z += delta * 10;
+                    warpGroupRef.current.position.z += delta * 15.0;
                 }
 
             } else {
-                // === NORMAL IDLE MODE ===
+                // === IDLE (STATIC) ===
                 
-                // Gentle Sphere Rotation
-                sphereRef.current.rotation.x = time * 0.2;
-                sphereRef.current.rotation.y = time * 0.3;
-                
-                // Gentle Text Float
-                groupRef.current.rotation.y = Math.sin(time * 0.5) * 0.1;
-                groupRef.current.rotation.z = 0; // Reset spin
-                groupRef.current.position.y = textBaseY + Math.sin(time * 0.8) * 0.03;
+                // --- Sphere Animation ---
+                const targetScale = 0.7;
+                sphereRef.current.scale.setScalar(targetScale);
+                sphereRef.current.position.set(0, sphereBaseY, sphereBaseZ);
 
-                // Restore Standard Transforms
-                sphereRef.current.scale.lerp(new THREE.Vector3(0.7, 0.7, 0.7), lerpSpeed);
-                sphereRef.current.position.lerp(new THREE.Vector3(0, sphereBaseY, sphereBaseZ), lerpSpeed);
-                
+                // Rotation: Constant slow idle
+                sphereRef.current.rotation.x = time * 0.15;
+                sphereRef.current.rotation.y = time * 0.25;
+
+                // Material: Clear Crystal
                 if (sphereMatRef.current) {
-                     sphereMatRef.current.distortion = THREE.MathUtils.lerp(sphereMatRef.current.distortion, 0.4, lerpSpeed);
-                     sphereMatRef.current.chromaticAberration = THREE.MathUtils.lerp(sphereMatRef.current.chromaticAberration, 1.0, lerpSpeed);
-                     sphereMatRef.current.color.lerp(new THREE.Color('#eef2ff'), lerpSpeed);
+                    sphereMatRef.current.roughness = 0.0;
+                    sphereMatRef.current.transmission = 1;
                 }
 
-                groupRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), lerpSpeed);
-                groupRef.current.position.z = 0;
+                // --- Text Animation ---
+                const hoverY = Math.sin(time * 0.5) * 0.03;
+                groupRef.current.position.set(0, textBaseY + hoverY, 0);
+                groupRef.current.rotation.y = Math.sin(time * 0.3) * 0.05;
 
-                // Restore Warp
-                if (warpGroupRef.current) {
-                    warpGroupRef.current.scale.z = THREE.MathUtils.lerp(warpGroupRef.current.scale.z, 1, lerpSpeed);
-                    warpGroupRef.current.position.z = 0;
+                // Text Material: Visible
+                if (textMatRef.current) {
+                    textMatRef.current.opacity = 1;
                 }
             }
         }
@@ -131,14 +116,14 @@ const MobileHero: React.FC<MobileHeroProps> = ({ isExiting }) => {
             <pointLight position={[-2, 1, 2]} intensity={8} color="#ffaaee" distance={5} />
             <pointLight position={[2, -1, 1]} intensity={8} color="#aaddff" distance={5} />
 
-            {/* Sphere: The Portal */}
+            {/* Sphere */}
             <mesh ref={sphereRef} position={[0, sphereBaseY, sphereBaseZ]} scale={0.7}>
-                <sphereGeometry args={[1, 32, 32]} />
-                <MeshTransmissionMaterial ref={sphereMatRef} {...crystalMaterialProps} />
+                <sphereGeometry args={[1, 64, 64]} />
+                <MeshTransmissionMaterial ref={sphereMatRef} {...crystalMaterialProps} transparent opacity={1} />
             </mesh>
 
-            {/* Text: The Traveler */}
-            <group ref={groupRef} position={[0, textBaseY, 0]}>
+            {/* Text */}
+            <group ref={groupRef} position={[0, textBaseY, -10]}>
                 <Center>
                     <Text3D
                         font={fontUrl}
@@ -157,18 +142,17 @@ const MobileHero: React.FC<MobileHeroProps> = ({ isExiting }) => {
                             ref={textMatRef}
                             {...crystalMaterialProps} 
                             backside 
-                            samples={4} 
+                            samples={4}
+                            transparent 
+                            opacity={1}
                         />
                     </Text3D>
                 </Center>
             </group>
             
-            {/* Background & Warp Stars */}
+            {/* Background Stars */}
             <group ref={warpGroupRef}>
-                {/* Standard Sparkles that will stretch */}
                 <Sparkles count={60} scale={8} size={4} speed={0.4} opacity={0.5} color="#ffffff" />
-                
-                {/* The "Rare" Stars (also stretch) */}
                 <Float speed={0.5} rotationIntensity={0.4} floatIntensity={0.4}>
                     <Sparkles 
                         count={2} 
@@ -195,8 +179,8 @@ const Product3DComposition: React.FC<Product3DCompositionProps> = ({ isExiting }
 
     useFrame((state, delta) => {
         const time = state.clock.elapsedTime;
-        // Ultra-slow, premium feel lerp speed
-        const lerpSpeed = delta * 1.2; 
+        // Speed tuned for 1000ms transition
+        const lerpSpeed = delta * 2.0; 
 
         if (groupRef.current && materialRef.current) {
             if (isExiting) {
@@ -217,23 +201,24 @@ const Product3DComposition: React.FC<Product3DCompositionProps> = ({ isExiting }
 
             } else {
                 // === ENTRY / IDLE: ELEGANT PRESENCE ===
+                const entrySpeed = delta * 1.5;
                 
                 // 1. Position: Float at standard depth
-                groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, -1.5, lerpSpeed);
+                groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, -1.5, entrySpeed);
                 // Center Y with simple Sine wave for idle
                 const hoverY = Math.sin(time * 0.3) * 0.1;
-                groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, hoverY, lerpSpeed);
+                groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, hoverY, entrySpeed);
 
                 // 2. Rotation: Very slow, majestic rotation
                 // Reset X tilt from potential exit
-                groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, Math.cos(time * 0.2) * 0.05, lerpSpeed);
+                groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, Math.cos(time * 0.2) * 0.05, entrySpeed);
                 // Y rotation for showcase
                 groupRef.current.rotation.y = Math.sin(time * 0.25) * 0.12; 
                 groupRef.current.rotation.z = Math.sin(time * 0.15) * 0.02;
 
                 // 3. Scale & Opacity: Full visibility
-                groupRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), lerpSpeed);
-                materialRef.current.opacity = THREE.MathUtils.lerp(materialRef.current.opacity, 1, lerpSpeed);
+                groupRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), entrySpeed);
+                materialRef.current.opacity = THREE.MathUtils.lerp(materialRef.current.opacity, 1, entrySpeed);
             }
         }
     });
@@ -283,14 +268,12 @@ const MobilePhilosophyDiamond: React.FC<MobilePhilosophyDiamondProps> = ({ isExi
         const time = state.clock.elapsedTime;
         const lerpSpeed = delta * 3.0;
 
-        // Entry Lerp Speed: 
-        // Using delta * 2.0 based on user request for faster arrival from closer distance
-        const arrivalSpeed = delta * 2.0;
+        // Entry Lerp Speed: Slow and elegant
+        const arrivalSpeed = delta * 0.8;
 
         if (meshRef.current && materialRef.current) {
             if (isExiting) {
                 // === PRISMATIC WARP EXIT ===
-                // (Preserved as requested)
                 
                 // 1. Move aggressively towards camera (to swallow it)
                 meshRef.current.position.z = THREE.MathUtils.lerp(meshRef.current.position.z, 2.5, lerpSpeed);
@@ -310,16 +293,13 @@ const MobilePhilosophyDiamond: React.FC<MobilePhilosophyDiamondProps> = ({ isExi
             } else {
                 // === SF MOVIE ARRIVAL (ENTRY) & IDLE ===
                 
-                // 1. Position Arrival:
-                // Comes from closer space (-6) to stable (-1.5) for fast appearance
-                meshRef.current.position.z = THREE.MathUtils.lerp(meshRef.current.position.z, -1.5, arrivalSpeed);
+                // 1. Position Arrival: From Foreground (5) to Background (-6)
+                meshRef.current.position.z = THREE.MathUtils.lerp(meshRef.current.position.z, -6.0, arrivalSpeed);
                 
-                // 2. Scale Arrival:
-                // From Nothing (0) to Massive Presence (2.4)
-                meshRef.current.scale.lerp(new THREE.Vector3(2.4, 2.4, 2.4), arrivalSpeed);
+                // 2. Scale Arrival: Large background object
+                meshRef.current.scale.lerp(new THREE.Vector3(3.5, 3.5, 3.5), arrivalSpeed);
                 
                 // 3. Rotation Deceleration:
-                // Blending from Initial Spin to "Orbital Idle" (slow rotation)
                 const targetIdleRotX = time * 0.15;
                 const targetIdleRotY = time * 0.2;
                 
@@ -332,7 +312,6 @@ const MobilePhilosophyDiamond: React.FC<MobilePhilosophyDiamondProps> = ({ isExi
 
                 // 5. Material Stabilization
                 if (materialRef.current) {
-                    // Start with high distortion (unstable wormhole) -> Clear diamond
                     materialRef.current.distortion = THREE.MathUtils.lerp(materialRef.current.distortion, 0.5, arrivalSpeed);
                     materialRef.current.chromaticAberration = THREE.MathUtils.lerp(materialRef.current.chromaticAberration, 1.2, arrivalSpeed);
                     materialRef.current.thickness = THREE.MathUtils.lerp(materialRef.current.thickness, 1.5, arrivalSpeed);
@@ -351,15 +330,9 @@ const MobilePhilosophyDiamond: React.FC<MobilePhilosophyDiamondProps> = ({ isExi
              <pointLight position={[3, -2, -2]} intensity={5} color="#ff00ff" distance={10} />
              <pointLight position={[0, 0, 5]} intensity={2} color="#ffffff" distance={10} />
 
-             {/* 
-                Initial State for Entry Animation:
-                Position: Closer start (-6)
-                Scale: 0
-                Rotation: [0.5, 3, 0]
-             */}
              <mesh 
                 ref={meshRef} 
-                position={[0, 0, -6]} 
+                position={[0, 0, 5]} // Start at foreground
                 scale={[0, 0, 0]} 
                 rotation={[0.5, 3, 0]}
              >
@@ -367,10 +340,10 @@ const MobilePhilosophyDiamond: React.FC<MobilePhilosophyDiamondProps> = ({ isExi
                 <MeshTransmissionMaterial 
                     ref={materialRef}
                     samples={4} 
-                    thickness={4.0} // Start thick/distorted
-                    chromaticAberration={3.0} // Start chromatic
+                    thickness={4.0} 
+                    chromaticAberration={3.0} 
                     anisotropy={0.3} 
-                    distortion={2.0} // Start distorted
+                    distortion={2.0} 
                     distortionScale={0.5}
                     temporalDistortion={0.1}
                     iridescence={1}
@@ -404,12 +377,11 @@ const MobileKineticGrid: React.FC<MobileKineticGridProps> = ({ isExiting }) => {
         const time = state.clock.elapsedTime;
         
         // 1. Manage Transition Progress
-        // Entry: Lerp from 0 to 1
         entryProgress.current = THREE.MathUtils.lerp(entryProgress.current, 1, delta * 1.5);
         
-        // Exit: Lerp from 0 to 1 only when exiting
+        // Exit: Speed up slightly for 1000ms transition
         if (isExiting) {
-             exitProgress.current = THREE.MathUtils.lerp(exitProgress.current, 1, delta * 2.0);
+             exitProgress.current = THREE.MathUtils.lerp(exitProgress.current, 1, delta * 2.5);
         } else {
              exitProgress.current = 0;
         }
@@ -428,8 +400,6 @@ const MobileKineticGrid: React.FC<MobileKineticGridProps> = ({ isExiting }) => {
             groupRef.current.rotation.y = baseRotY + (time * 0.05) + (exit * time * 2.0); // Spin faster on exit
             
             // Move group towards camera on exit (Vortex Tunnel)
-            // Start at z=0, Camera at z=5. 
-            // Fly past camera to z=6
             groupRef.current.position.z = exit * 6.0; 
         }
 
@@ -439,7 +409,6 @@ const MobileKineticGrid: React.FC<MobileKineticGridProps> = ({ isExiting }) => {
         let i = 0;
         for (let x = 0; x < count; x++) {
             for (let z = 0; z < count; z++) {
-                // Spread logic for Exit (Tunnel effect)
                 const spread = 0.6 + (exit * 0.8); 
                 const xPos = (x - count / 2) * spread;
                 const zPos = (z - count / 2) * spread;
@@ -447,9 +416,6 @@ const MobileKineticGrid: React.FC<MobileKineticGridProps> = ({ isExiting }) => {
                 
                 // Wave Logic
                 let yPos = Math.sin(dist * 2 - time * 2) * 0.5;
-                
-                // ENTRY ANIMATION: Rise from below
-                // As entry goes 0->1, yPos goes from (yPos - 10) to yPos
                 yPos -= (1 - entry) * 8.0;
                 
                 dummy.position.set(xPos, yPos, zPos);
@@ -457,25 +423,20 @@ const MobileKineticGrid: React.FC<MobileKineticGridProps> = ({ isExiting }) => {
                 // Rotation
                 dummy.rotation.set(
                     Math.sin(x/4 + time) + yPos, 
-                    exit * time * 5, // Spin individual cubes on exit
+                    exit * time * 5, 
                     Math.cos(z/4 + time) + yPos
                 );
                 
                 // Scale
                 let s = (Math.sin(x + z + time) * 0.5 + 0.5) * 0.8 + 0.2;
-                s *= entry; // Grow from 0 on entry
+                s *= entry; 
                 
                 dummy.scale.set(s, s, s);
                 dummy.updateMatrix();
                 meshRef.current.setMatrixAt(i, dummy.matrix);
                 
-                // Color Logic - Matched to Desktop
-                // Desktop: 0.9 + ... range (Red/Orange/Pink mix)
                 color.setHSL(0.9 + ((Math.sin(dist * 3 - time) + 1) / 2) * 0.15, 1, 0.5);
-                
-                // Flash white on exit
                 if (exit > 0) color.lerp(new THREE.Color('#ffffff'), exit);
-                
                 meshRef.current.setColorAt(i, color);
                 i++;
             }
@@ -486,7 +447,6 @@ const MobileKineticGrid: React.FC<MobileKineticGridProps> = ({ isExiting }) => {
 
     return (
         <group>
-            {/* Matching Desktop Lighting */}
             <spotLight position={[10, 10, 10]} intensity={1} />
             <ambientLight intensity={0.5} />
 
@@ -499,8 +459,6 @@ const MobileKineticGrid: React.FC<MobileKineticGridProps> = ({ isExiting }) => {
         </group>
     );
 };
-
-// --- Mobile Singularity (Desktop-grade Black Hole + Floating Dots) ---
 
 const MobileBlackHoleMaterial = shaderMaterial(
   {
@@ -552,10 +510,9 @@ interface MobileFloatingDotsProps {
 
 const MobileFloatingDots: React.FC<MobileFloatingDotsProps> = ({ isExiting }) => {
     const meshRef = useRef<THREE.InstancedMesh>(null);
-    const count = 400; // Count matched to user request
+    const count = 400; 
     const dummy = useMemo(() => new THREE.Object3D(), []);
     
-    // Store polar coordinates instead of cartesian for Horizon effect
     const { radii, angles, speeds, yOffsets } = useMemo(() => {
         const radii = new Float32Array(count);
         const angles = new Float32Array(count);
@@ -563,17 +520,9 @@ const MobileFloatingDots: React.FC<MobileFloatingDotsProps> = ({ isExiting }) =>
         const yOffsets = new Float32Array(count);
         
         for (let i = 0; i < count; i++) {
-            // Distribute in a disc/ring around the black hole
-            // Radius: Inner 1.8 to Outer 5.0
             radii[i] = 1.8 + Math.random() * 3.2;
-            
-            // Angle: Full 360 degrees
             angles[i] = Math.random() * Math.PI * 2;
-            
-            // Speed: Slower random orbit speed for flowing effect
             speeds[i] = 0.05 + Math.random() * 0.15;
-            
-            // Y Offset: Very slight variance to create a "thick" disk/horizon
             yOffsets[i] = (Math.random() - 0.5) * 0.4;
         }
         return { radii, angles, speeds, yOffsets };
@@ -586,13 +535,10 @@ const MobileFloatingDots: React.FC<MobileFloatingDotsProps> = ({ isExiting }) =>
         if (!meshRef.current) return;
         const time = state.clock.elapsedTime;
 
-        // --- 1. Transition Progress ---
-        // Entry: 0 -> 1 (Expansion from Singularity)
         entryProgress.current = THREE.MathUtils.lerp(entryProgress.current, 1, delta * 1.5);
         
-        // Exit: 0 -> 1 (Scale down)
         if (isExiting) {
-             exitProgress.current = THREE.MathUtils.lerp(exitProgress.current, 1, delta * 0.5);
+             exitProgress.current = THREE.MathUtils.lerp(exitProgress.current, 1, delta * 1.0);
         } else {
              exitProgress.current = 0;
         }
@@ -600,8 +546,6 @@ const MobileFloatingDots: React.FC<MobileFloatingDotsProps> = ({ isExiting }) =>
         const entry = entryProgress.current;
         const exit = exitProgress.current;
 
-        // Apply easing to entry for "Fantastic Expansion" effect
-        // Starts fast, slows down as it reaches orbit (EaseOutCubic-ish)
         const easedEntry = 1 - Math.pow(1 - entry, 3);
 
         for (let i = 0; i < count; i++) {
@@ -610,38 +554,26 @@ const MobileFloatingDots: React.FC<MobileFloatingDotsProps> = ({ isExiting }) =>
             const speed = speeds[i];
             const yBase = yOffsets[i];
             
-            // --- 2. Fantastic Flowing Animation ---
-            // Current Radius scales from 0 (Singularity) to rBase (Orbit)
-            // Add a slow radial "breathing" drift based on time and index to make it organic
             const radialDrift = Math.sin(time * 0.5 + i * 0.1) * 0.3; 
             const r = (rBase + radialDrift) * easedEntry;
             
-            // Orbital Rotation with Drift
-            // Add a secondary angular drift for "river-like" non-uniform flow
             const angularDrift = Math.cos(time * 0.2 + i) * 0.2;
             const theta = thetaBase + time * (speed * 0.5) + angularDrift;
             
-            // --- 3. Position Calculation (Polar -> Cartesian) ---
             const x = r * Math.cos(theta);
             const z = r * Math.sin(theta);
             
-            // Horizon floating effect
-            // Enhanced vertical wave for "flowing" liquid feel
             const verticalWave = Math.sin(time * 0.3 + x * 0.5) * 0.2;
             const y = (yBase + verticalWave) * easedEntry;
 
             dummy.position.set(x, y, z);
             
-            // Rotation: Face center or spin gently
             dummy.rotation.set(
                 Math.sin(time * speed) * 0.5, 
-                theta, // Face tangent/outward
+                theta,
                 Math.cos(time * speed * 0.5) * 0.5
             );
             
-            // --- 4. Scale Logic ---
-            // Entry: Grow from 0
-            // Exit: Shrink to 0 (synced with black hole)
             let s = easedEntry; 
             s *= Math.max(0, 1.0 - exit * 1.6);
             
@@ -672,14 +604,11 @@ const MobileSingularity: React.FC<MobileSingularityProps> = ({ isExiting }) => {
     useFrame((state, delta) => {
         const time = state.clock.elapsedTime;
         
-        // 1. Transition Logic
-        // Entry: 0 -> 1 (Gravitational Collapse)
         entryProgress.current = THREE.MathUtils.lerp(entryProgress.current, 1, delta * 1.5);
         
-        // Exit: 0 -> 1 (Event Horizon Expansion)
         if (isExiting) {
-             // SLOWER EXIT for majestic growth (approx 2s)
-             exitProgress.current = THREE.MathUtils.lerp(exitProgress.current, 1, delta * 0.5);
+             // Standardized exit speed for 1000ms
+             exitProgress.current = THREE.MathUtils.lerp(exitProgress.current, 1, delta * 1.0);
         } else {
              exitProgress.current = 0;
         }
@@ -687,17 +616,13 @@ const MobileSingularity: React.FC<MobileSingularityProps> = ({ isExiting }) => {
         const entry = entryProgress.current;
         const exit = exitProgress.current;
 
-        // 2. Black Hole Mesh
         if (blackHoleRef.current) {
             // @ts-ignore
             blackHoleRef.current.material.uniforms.uTime.value = time;
             
-            // ENTRY: Grow from 0 to 1.2
             let scale = THREE.MathUtils.lerp(0, 1.2, Math.pow(entry, 2)); 
             
-            // EXIT: Grow slowly from 1.2 to 20 (Swallow screen slowly)
             if (exit > 0) {
-                // INSTABILITY SHAKE before rapid expansion
                 if (exit < 0.2) {
                     blackHoleRef.current.position.x = (Math.random() - 0.5) * 0.1;
                     blackHoleRef.current.position.y = -0.5 + (Math.random() - 0.5) * 0.1;
@@ -705,8 +630,6 @@ const MobileSingularity: React.FC<MobileSingularityProps> = ({ isExiting }) => {
                     blackHoleRef.current.position.set(0, -0.5, 0);
                 }
 
-                // Slower expansion curve: Starts slow, speeds up at end
-                // Max scale 20 is enough to cover mobile screen
                 scale = THREE.MathUtils.lerp(1.2, 20, Math.pow(exit, 2.5));
             }
             
@@ -716,7 +639,6 @@ const MobileSingularity: React.FC<MobileSingularityProps> = ({ isExiting }) => {
 
     return (
         <group position={[0, -0.5, 0]}>
-            {/* Background (Same as Hero) */}
              <Sparkles count={60} scale={8} size={4} speed={0.4} opacity={0.5} color="#ffffff" />
             <Float speed={0.5} rotationIntensity={0.4} floatIntensity={0.4}>
                 <Sparkles 
@@ -729,16 +651,13 @@ const MobileSingularity: React.FC<MobileSingularityProps> = ({ isExiting }) => {
                 />
             </Float>
 
-            {/* Main Black Hole Sphere */}
             <mesh ref={blackHoleRef} scale={0}>
                 <sphereGeometry args={[1.5, 32, 32]} /> 
                 {/* @ts-ignore */}
                 <mobileBlackHoleMaterial transparent />
             </mesh>
             
-            {/* Floating Dots Horizon (Foreground/Midground) */}
             <MobileFloatingDots isExiting={isExiting} />
-            
             <pointLight position={[0, 0, 2]} color="#ff3300" intensity={2} distance={10} />
         </group>
     );
@@ -749,6 +668,7 @@ const MobileSingularity: React.FC<MobileSingularityProps> = ({ isExiting }) => {
 const Section1 = ({ isExiting }: { isExiting: boolean }) => (
     <motion.div 
         className="h-full flex flex-col items-center justify-center relative pointer-events-none"
+        initial={{ opacity: 1 }} 
         animate={{ opacity: isExiting ? 0 : 1 }}
         transition={{ duration: 0.3 }}
     >
@@ -859,8 +779,7 @@ const Section5 = ({ isExiting }: { isExiting: boolean }) => (
                 filter: "blur(20px)", 
                 scale: 1.1,
                 y: -50,
-                // Longer duration to match slow black hole expansion
-                transition: { duration: 1.5, ease: "easeInOut" } 
+                transition: { duration: 0.8, ease: "easeInOut" } 
             }
         }}
     >
@@ -891,19 +810,16 @@ const Section5 = ({ isExiting }: { isExiting: boolean }) => (
 const Section6 = ({ onNavigate, onOpenPrivacy }: { onNavigate?: (view: ViewState) => void, onOpenPrivacy: () => void }) => (
     <div className="h-full flex flex-col items-center justify-center p-8 pointer-events-none relative">
         <div className="text-center text-white z-10 w-full mb-20">
-            {/* Title - Resized to fit screen (5xl with sm:6xl breakpoint) */}
             <h2 className="text-5xl sm:text-6xl font-display font-bold tracking-tighter mb-12 leading-none text-transparent bg-clip-text bg-gradient-to-b from-white to-transparent opacity-80 drop-shadow-2xl break-words w-full">
                 A DOT<br/>EXPANDS
             </h2>
             
-            {/* Body Text - Updated */}
             <div className="text-sm font-normal font-inter leading-relaxed max-w-xs mx-auto text-white space-y-3 drop-shadow-md">
                 <p>一つの小さな点から大きな波が生まれている。</p>
                 <p>一人の小さな輝きが、<br/>今この瞬間も誰かの人生を変えている。</p>
             </div>
         </div>
         
-        {/* Footer - Pinned to bottom */}
         <footer className="absolute bottom-10 w-full text-center pointer-events-auto">
             <button 
                 onClick={onOpenPrivacy} 
@@ -949,6 +865,10 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
 
         const swipeDistance = touchStartY.current - touchEndY.current;
         const threshold = 50;
+        
+        // UNIFIED TRANSITION TIME (1000ms)
+        const TRANSITION_TIME = 1000;
+        const BUFFER_TIME = 200;
 
         if (Math.abs(swipeDistance) > threshold) {
             
@@ -959,8 +879,8 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
                 setTimeout(() => {
                     setCurrentSection(1);
                     setHeroExiting(false);
-                    setTimeout(() => setIsTransitioning(false), 200); 
-                }, 500); 
+                    setTimeout(() => setIsTransitioning(false), 100); 
+                }, TRANSITION_TIME); 
                 return;
             }
 
@@ -972,8 +892,8 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
                     if (swipeDistance > 0) setCurrentSection(2);
                     else setCurrentSection(0);
                     setProductExiting(false);
-                    setTimeout(() => setIsTransitioning(false), 200);
-                }, 1200); 
+                    setTimeout(() => setIsTransitioning(false), BUFFER_TIME);
+                }, TRANSITION_TIME); 
                 return;
             }
 
@@ -985,8 +905,8 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
                     if (swipeDistance > 0) setCurrentSection(3);
                     else setCurrentSection(1);
                     setPhilosophyExiting(false);
-                    setTimeout(() => setIsTransitioning(false), 200);
-                }, 800);
+                    setTimeout(() => setIsTransitioning(false), BUFFER_TIME);
+                }, TRANSITION_TIME);
                 return;
             }
 
@@ -998,8 +918,8 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
                     if (swipeDistance > 0) setCurrentSection(4);
                     else setCurrentSection(2);
                     setVisionExiting(false);
-                    setTimeout(() => setIsTransitioning(false), 200);
-                }, 1000); 
+                    setTimeout(() => setIsTransitioning(false), BUFFER_TIME);
+                }, TRANSITION_TIME); 
                 return;
             }
 
@@ -1011,9 +931,8 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
                     if (swipeDistance > 0) setCurrentSection(5);
                     else setCurrentSection(3);
                     setDotExiting(false);
-                    // Reduced timeout to 1200ms for snappier transition
-                    setTimeout(() => setIsTransitioning(false), 200);
-                }, 1200); 
+                    setTimeout(() => setIsTransitioning(false), BUFFER_TIME);
+                }, TRANSITION_TIME); 
                 return;
             }
 
@@ -1029,6 +948,9 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
     };
 
     const scrollToSection = (index: number) => {
+        const TRANSITION_TIME = 1000;
+        const BUFFER_TIME = 200;
+
         if (!isTransitioning && index !== currentSection) {
             if (currentSection === 0 && index > 0) {
                 setIsTransitioning(true);
@@ -1036,40 +958,40 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
                 setTimeout(() => {
                     setCurrentSection(index);
                     setHeroExiting(false);
-                    setTimeout(() => setIsTransitioning(false), 200);
-                }, 500);
+                    setTimeout(() => setIsTransitioning(false), BUFFER_TIME);
+                }, TRANSITION_TIME);
             } else if (currentSection === 1 && index !== 1) {
                 setIsTransitioning(true);
                 setProductExiting(true);
                 setTimeout(() => {
                     setCurrentSection(index);
                     setProductExiting(false);
-                    setTimeout(() => setIsTransitioning(false), 200);
-                }, 1200); 
+                    setTimeout(() => setIsTransitioning(false), BUFFER_TIME);
+                }, TRANSITION_TIME); 
             } else if (currentSection === 2 && index !== 2) {
                 setIsTransitioning(true);
                 setPhilosophyExiting(true);
                 setTimeout(() => {
                     setCurrentSection(index);
                     setPhilosophyExiting(false);
-                    setTimeout(() => setIsTransitioning(false), 200);
-                }, 800);
+                    setTimeout(() => setIsTransitioning(false), BUFFER_TIME);
+                }, TRANSITION_TIME);
             } else if (currentSection === 3 && index !== 3) {
                 setIsTransitioning(true);
                 setVisionExiting(true);
                 setTimeout(() => {
                     setCurrentSection(index);
                     setVisionExiting(false);
-                    setTimeout(() => setIsTransitioning(false), 200);
-                }, 1000);
+                    setTimeout(() => setIsTransitioning(false), BUFFER_TIME);
+                }, TRANSITION_TIME);
             } else if (currentSection === 4 && index !== 4) {
                 setIsTransitioning(true);
                 setDotExiting(true);
                 setTimeout(() => {
                     setCurrentSection(index);
                     setDotExiting(false);
-                    setTimeout(() => setIsTransitioning(false), 200);
-                }, 1200);
+                    setTimeout(() => setIsTransitioning(false), BUFFER_TIME);
+                }, TRANSITION_TIME);
             } else {
                 setIsTransitioning(true);
                 setCurrentSection(index);
@@ -1088,11 +1010,11 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
             <AnimatePresence>
                 {(heroExiting) && (
                     <motion.div 
-                        className="fixed inset-0 bg-white z-[100] pointer-events-none mix-blend-screen"
+                        className="fixed inset-0 bg-white z-[30] pointer-events-none"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeIn", delay: 0.2 }}
+                        exit={{ opacity: 0, transition: { duration: 0.5, delay: 0 } }} 
+                        transition={{ duration: 0.2, ease: "easeIn", delay: 0.8 }}
                     />
                 )}
             </AnimatePresence>
@@ -1101,11 +1023,10 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
             <AnimatePresence>
                 {(dotExiting) && (
                     <motion.div 
-                        className="fixed inset-0 bg-[#050505] z-[100] pointer-events-none"
+                        className="fixed inset-0 bg-[#050505] z-[30] pointer-events-none"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        // Speed up blackout to finish before 1.2s switch (Delay 0.4 + Duration 0.6 = 1.0s)
                         transition={{ duration: 0.6, ease: "easeInOut", delay: 0.4 }}
                     />
                 )}
@@ -1113,7 +1034,6 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
 
             {/* Navigation Indicators */}
             <div className="absolute inset-x-0 top-24 bottom-8 pointer-events-none z-40 flex flex-col justify-between">
-                {/* Top Indicator (Up Arrow) - Show if not first section */}
                 <div className="flex justify-center h-8">
                     {currentSection > 0 && (
                         <motion.div 
@@ -1128,7 +1048,6 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
                     )}
                 </div>
 
-                {/* Bottom Indicator (Down Arrow) - Show if not last section. Exclude Section 0 (has custom) */}
                 <div className="flex justify-center h-8">
                     {currentSection < 5 && currentSection !== 0 && (
                         <motion.div 
@@ -1193,7 +1112,7 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
             <AnimatePresence mode="wait">
                 <motion.div
                     key={currentSection}
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={currentSection === 0 ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -30 }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
