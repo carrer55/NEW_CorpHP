@@ -263,26 +263,21 @@ const HeroComposition = () => {
                     const scaleEase = Math.pow(absorbEase, 4);
                     const currentTextScale = THREE.MathUtils.lerp(1, 0, scaleEase);
 
-                    // 3. Floating (Dampened by scroll)
-                    const floatDampen = 1.0 - absorbEase;
-                    const tFloatY = (Math.sin(time * 0.5) * 0.1) * floatDampen;
-                    const tFloatX = (Math.cos(time * 0.4) * 0.05) * floatDampen;
-
-                    // 4. Position Update (vertical and depth movement)
+                    // 3. Position Update (vertical and depth movement)
                     textGroupRef.current.position.set(
-                        tFloatX,
-                        THREE.MathUtils.lerp(textStartY, textEndY, moveEase) + tFloatY,
+                        0,
+                        THREE.MathUtils.lerp(textStartY, textEndY, moveEase),
                         THREE.MathUtils.lerp(textStartZ, textEndZ, absorbAggressive) // Aggressive depth pull
                     );
 
                     textGroupRef.current.scale.setScalar(currentTextScale);
 
-                    // 5. Rotation (Spiral into the sphere)
+                    // 4. Rotation (Spiral into the sphere)
                     textGroupRef.current.rotation.y = THREE.MathUtils.lerp(0, Math.PI * 1.5, moveEase);
                     textGroupRef.current.rotation.x = THREE.MathUtils.lerp(0, Math.PI / 6, moveEase);
                     textGroupRef.current.rotation.z = THREE.MathUtils.lerp(0, -Math.PI / 4, moveEase);
 
-                    // 6. Text Material (Liquify and dissolve)
+                    // 5. Text Material (Liquify and dissolve)
                     if (textMatRef.current) {
                         textMatRef.current.distortion = THREE.MathUtils.lerp(0.4, 4.5, moveEase);
                         textMatRef.current.thickness = THREE.MathUtils.lerp(1.5, 0.0, moveEase);
