@@ -359,6 +359,7 @@ const HeroComposition = () => {
     );
 };
 
+// Desktop Product Panel with heavy tilt effect (thick panel)
 const DesktopProductPanel = () => {
     const groupRef = useRef<THREE.Group>(null);
     const materialRef = useRef<THREE.MeshStandardMaterial>(null);
@@ -366,25 +367,31 @@ const DesktopProductPanel = () => {
     const { mouse } = useThree((state) => state);
     const texture = useTexture("https://images.unsplash.com/photo-1550684848-fac1c5b4e853?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80");
 
+    // Target rotation values for smooth interpolation
     const targetRotation = useRef({ x: 0, y: 0 });
 
     useFrame((state, delta) => {
         const time = state.clock.elapsedTime;
 
         if (groupRef.current && materialRef.current) {
+            // Gentle floating animation
             const hoverY = Math.sin(time * 0.3) * 0.1;
             const hoverZ = Math.cos(time * 0.25) * 0.08;
 
             groupRef.current.position.y = hoverY;
             groupRef.current.position.z = -1.5 + hoverZ;
 
+            // Heavy tilt effect based on mouse position
+            // Invert Y for natural feel (mouse up = tilt back)
             targetRotation.current.x = -mouse.y * 0.4;
             targetRotation.current.y = mouse.x * 0.4;
 
-            const lerpFactor = 1.5 * delta;
+            // Smooth, heavy interpolation (slow response = heavy feel)
+            const lerpFactor = 1.5 * delta; // Very slow lerp for weight
             groupRef.current.rotation.x += (targetRotation.current.x - groupRef.current.rotation.x) * lerpFactor;
             groupRef.current.rotation.y += (targetRotation.current.y - groupRef.current.rotation.y) * lerpFactor;
 
+            // Subtle ambient rotation
             groupRef.current.rotation.z = Math.sin(time * 0.15) * 0.02;
 
             materialRef.current.opacity = 1;
@@ -393,31 +400,35 @@ const DesktopProductPanel = () => {
 
     return (
         <group position={[0, POS_PRODUCTS * height, 0]}>
+            {/* Dynamic Lights for the panel */}
             <pointLight position={[3, 2, 4]} intensity={1.5} color="#00ffff" distance={10} />
             <pointLight position={[-3, -2, -4]} intensity={1.5} color="#ff9900" distance={10} />
 
+            {/* The Thick Holographic Image Panel */}
             <group ref={groupRef} position={[0, 0, -1.5]} scale={1}>
-                <mesh position={[0, 0, 0.08]}>
-                    <boxGeometry args={[2.5, 3.2, 0.15]} />
+                {/* Front face */}
+                <mesh position={[0, 0, 0.2]}>
+                    <boxGeometry args={[2.5, 3.2, 0.4]} />
                     <meshStandardMaterial
                         ref={materialRef}
                         map={texture}
-                        roughness={0.05}
-                        metalness={0.75}
+                        roughness={0.1}
+                        metalness={0.6}
                         emissiveMap={texture}
-                        emissiveIntensity={0.15}
+                        emissiveIntensity={0.2}
                         color="#ffffff"
                         transparent
                         opacity={1}
                     />
                 </mesh>
 
-                <mesh position={[0, 0, 0.08]}>
-                    <boxGeometry args={[2.52, 3.22, 0.17]} />
+                {/* Edge glow for depth perception */}
+                <mesh position={[0, 0, 0.2]}>
+                    <boxGeometry args={[2.52, 3.22, 0.42]} />
                     <meshBasicMaterial
-                        color="#00ddff"
+                        color="#00ffff"
                         transparent
-                        opacity={0.08}
+                        opacity={0.1}
                         side={THREE.BackSide}
                     />
                 </mesh>
