@@ -408,7 +408,7 @@ const DesktopProductPanel = () => {
             <group ref={groupRef} position={[0, 0, -1.5]} scale={1}>
                 {/* Front face */}
                 <mesh position={[0, 0, 0.2]}>
-                    <boxGeometry args={[2.5, 3.2, 0.4]} />
+                    <boxGeometry args={[2.5, 3.2, 0.15]} />
                     <meshStandardMaterial
                         ref={materialRef}
                         map={texture}
@@ -424,7 +424,7 @@ const DesktopProductPanel = () => {
 
                 {/* Edge glow for depth perception */}
                 <mesh position={[0, 0, 0.2]}>
-                    <boxGeometry args={[2.52, 3.22, 0.42]} />
+                    <boxGeometry args={[2.52, 3.22, 0.17]} />
                     <meshBasicMaterial
                         color="#00ffff"
                         transparent
