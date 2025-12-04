@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree, extend } from '@react-three/fiber';
-import { useScroll, Environment, Float, Sparkles, MeshTransmissionMaterial, shaderMaterial, ScrollControls, Scroll, Text3D, Center, useTexture } from '@react-three/drei';
+import { useScroll, Float, Sparkles, MeshTransmissionMaterial, shaderMaterial, ScrollControls, Scroll, Text3D, Center, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { DistortedImage } from './DistortedImage';
 import { Overlay } from './Overlay';
@@ -850,10 +850,11 @@ export const SceneWrapper = ({ mode, onNavigate }: { mode: 'HOME' | 'AMBIENT', o
     return (
         <>
             <color attach="background" args={['#050505']} />
-            <Environment preset="city" />
-            <ambientLight intensity={0.5} />
-            <spotLight position={[10, 10, 10]} intensity={1} />
-            
+            <ambientLight intensity={0.8} />
+            <directionalLight position={[5, 5, 5]} intensity={1.2} />
+            <directionalLight position={[-5, -5, -5]} intensity={0.5} />
+            <hemisphereLight args={['#ffffff', '#444444', 0.6]} />
+
             {mode === 'HOME' ? <HomeScene onNavigate={onNavigate} /> : <AmbientScene />}
         </>
     );
