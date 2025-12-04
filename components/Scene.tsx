@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree, extend } from '@react-three/fiber';
-import { useScroll, Float, Sparkles, MeshTransmissionMaterial, shaderMaterial, ScrollControls, Scroll, Text3D, Center, useTexture } from '@react-three/drei';
+import { useScroll, Float, Sparkles, MeshTransmissionMaterial, shaderMaterial, ScrollControls, Scroll, Text3D, Center, useTexture, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import { DistortedImage } from './DistortedImage';
 import { Overlay } from './Overlay';
@@ -141,21 +141,20 @@ const HeroComposition = () => {
     const crystalMaterialProps = useMemo(() => ({
         samples: Math.round((isMobile ? 4 : settings.transmissionSamples) * settings.geometryDetail),
         resolution: isMobile ? 512 : settings.transmissionResolution,
-        transmission: 0.95,
-        thickness: 2.0,
-        chromaticAberration: 1.2,
-        anisotropy: 0.4,
-        distortion: 0.5,
-        distortionScale: 0.6,
-        temporalDistortion: 0.3,
-        iridescence: 1.0,
-        iridescenceIOR: 1.3,
-        iridescenceThicknessRange: [100, 1400] as [number, number],
-        roughness: 0.05,
-        ior: 1.6,
-        color: "#e8f0ff",
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.0,
+        transmission: 1,
+        thickness: 1.5,
+        chromaticAberration: 1.0,
+        anisotropy: 0.3,
+        distortion: 0.4,
+        distortionScale: 0.5,
+        temporalDistortion: 0.2,
+        iridescence: 1,
+        iridescenceIOR: 1.2,
+        iridescenceThicknessRange: [0, 1400] as [number, number],
+        roughness: 0.0,
+        ior: 1.5,
+        color: "#ffffff",
+        background: new THREE.Color('#050505'),
         toneMapped: false,
     }), [isMobile, settings]);
     
@@ -497,19 +496,16 @@ export const PrismaticArtifact = () => {
                     backside
                     samples={Math.max(2, Math.round(3 * settings.geometryDetail))}
                     resolution={settings.transmissionResolution}
-                    transmission={0.9}
-                    thickness={1.5}
-                    chromaticAberration={1.2}
-                    anisotropy={0.3}
-                    distortion={0.6}
-                    iridescence={1.0}
-                    iridescenceIOR={1.3}
-                    iridescenceThicknessRange={[100, 1200]}
-                    roughness={0.05}
-                    ior={1.6}
-                    color="#e8f0ff"
-                    clearcoat={1.0}
-                    clearcoatRoughness={0.0}
+                    transmission={1}
+                    thickness={0.5}
+                    chromaticAberration={1}
+                    anisotropy={0.2}
+                    distortion={0.5}
+                    iridescence={1}
+                    roughness={0.1}
+                    ior={1.5}
+                    color="#ffffff"
+                    background={new THREE.Color('#050505')}
                 />
             </mesh>
         </group>
@@ -855,26 +851,15 @@ export const AmbientScene = () => {
     );
 };
 
-const EnvironmentSphere = () => {
-    return (
-        <mesh scale={[-50, -50, -50]}>
-            <sphereGeometry args={[1, 32, 32]} />
-            <meshBasicMaterial color="#1a1a2e" side={THREE.BackSide} />
-        </mesh>
-    );
-};
-
 export const SceneWrapper = ({ mode, onNavigate }: { mode: 'HOME' | 'AMBIENT', onNavigate?: (view: ViewState) => void }) => {
     return (
         <>
             <color attach="background" args={['#050505']} />
-            <EnvironmentSphere />
+            <Environment preset="night" />
             <ambientLight intensity={0.8} />
             <directionalLight position={[5, 5, 5]} intensity={1.2} />
             <directionalLight position={[-5, -5, -5]} intensity={0.5} />
             <hemisphereLight args={['#ffffff', '#444444', 0.6]} />
-            <pointLight position={[0, 0, 5]} intensity={2} color="#4080ff" />
-            <pointLight position={[0, 0, -5]} intensity={2} color="#ff8040" />
 
             {mode === 'HOME' ? <HomeScene onNavigate={onNavigate} /> : <AmbientScene />}
         </>
