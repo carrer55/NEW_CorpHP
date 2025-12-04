@@ -391,22 +391,22 @@ const DesktopProductPanelInner = () => {
         const time = state.clock.elapsedTime;
 
         // Gentle hover animation
-        const hoverY = Math.sin(time * 0.3) * 0.1;
+        const hoverY = Math.sin(time * 0.3) * 0.15;
 
         // Cursor parallax effect - subtle response to mouse movement
-        const parallaxX = mouse.x * 0.15; // Reduced influence for subtle effect
-        const parallaxY = mouse.y * 0.1;
+        const parallaxX = mouse.x * 0.2;
+        const parallaxY = mouse.y * 0.15;
 
         groupRef.current.position.set(parallaxX, hoverY + parallaxY, 0);
 
         // Slow, majestic rotation
-        groupRef.current.rotation.x = Math.cos(time * 0.2) * 0.05;
-        groupRef.current.rotation.y = Math.sin(time * 0.25) * 0.12;
-        groupRef.current.rotation.z = Math.sin(time * 0.15) * 0.02;
+        groupRef.current.rotation.x = Math.cos(time * 0.2) * 0.08;
+        groupRef.current.rotation.y = Math.sin(time * 0.25) * 0.15;
+        groupRef.current.rotation.z = Math.sin(time * 0.15) * 0.03;
     });
 
     return (
-        <group position={[-1.2, POS_PRODUCTS * height, 0]}>
+        <group position={[0, POS_PRODUCTS * height, -2]}>
             {/* Background Stars */}
             <Sparkles count={60} scale={8} size={4} speed={0.2} opacity={0.5} color="#ffffff" />
             <Float speed={0.3} rotationIntensity={0.2} floatIntensity={0.2}>
@@ -414,23 +414,24 @@ const DesktopProductPanelInner = () => {
             </Float>
 
             {/* Dynamic Lights */}
-            <pointLight position={[3, 2, 4]} intensity={1.5} color="#00ffff" distance={10} />
-            <pointLight position={[-3, -2, -4]} intensity={1.5} color="#ff9900" distance={10} />
+            <pointLight position={[3, 2, 2]} intensity={2} color="#00ffff" distance={10} />
+            <pointLight position={[-3, -2, 2]} intensity={2} color="#ff9900" distance={10} />
 
             {/* The Holographic Image Panel */}
             <group ref={groupRef} position={[0, 0, 0]}>
                 <mesh>
-                    <boxGeometry args={[2.8, 3.6, 0.1]} />
+                    <boxGeometry args={[3.0, 3.8, 0.1]} />
                     <meshStandardMaterial
                         ref={materialRef}
                         map={texture}
                         roughness={0.1}
                         metalness={0.6}
                         emissiveMap={texture}
-                        emissiveIntensity={0.2}
+                        emissiveIntensity={0.3}
                         color="#ffffff"
                         transparent
                         opacity={1}
+                        side={THREE.DoubleSide}
                     />
                 </mesh>
             </group>
