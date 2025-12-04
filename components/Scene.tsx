@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree, extend } from '@react-three/fiber';
-import { useScroll, Float, Sparkles, MeshTransmissionMaterial, shaderMaterial, ScrollControls, Scroll, Text3D, Center, useTexture, Environment } from '@react-three/drei';
+import { useScroll, Float, Sparkles, MeshTransmissionMaterial, shaderMaterial, ScrollControls, Scroll, Text3D, Center, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { DistortedImage } from './DistortedImage';
 import { Overlay } from './Overlay';
@@ -141,6 +141,7 @@ const HeroComposition = () => {
     const crystalMaterialProps = useMemo(() => ({
         samples: Math.round((isMobile ? 4 : settings.transmissionSamples) * settings.geometryDetail),
         resolution: isMobile ? 512 : settings.transmissionResolution,
+        transmission: 1,
         thickness: 1.5,
         chromaticAberration: 1.0,
         anisotropy: 0.3,
@@ -151,8 +152,9 @@ const HeroComposition = () => {
         iridescenceIOR: 1.2,
         iridescenceThicknessRange: [0, 1400] as [number, number],
         roughness: 0.0,
-        color: "#eef2ff",
-        background: new THREE.Color('#000000'),
+        ior: 1.5,
+        color: "#ffffff",
+        background: new THREE.Color('#050505'),
         toneMapped: false,
     }), [isMobile, settings]);
     
@@ -494,13 +496,16 @@ export const PrismaticArtifact = () => {
                     backside
                     samples={Math.max(2, Math.round(3 * settings.geometryDetail))}
                     resolution={settings.transmissionResolution}
+                    transmission={1}
                     thickness={0.5}
                     chromaticAberration={1}
                     anisotropy={0.2}
                     distortion={0.5}
                     iridescence={1}
                     roughness={0.1}
-                    color="#e0e0ff"
+                    ior={1.5}
+                    color="#ffffff"
+                    background={new THREE.Color('#050505')}
                 />
             </mesh>
         </group>
@@ -850,7 +855,6 @@ export const SceneWrapper = ({ mode, onNavigate }: { mode: 'HOME' | 'AMBIENT', o
     return (
         <>
             <color attach="background" args={['#050505']} />
-            <Environment preset="city" />
             <ambientLight intensity={0.8} />
             <directionalLight position={[5, 5, 5]} intensity={1.2} />
             <directionalLight position={[-5, -5, -5]} intensity={0.5} />
