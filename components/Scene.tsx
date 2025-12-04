@@ -100,10 +100,20 @@ const HeroComposition = () => {
     const scroll = useScroll();
     const { width, height } = useThree((state) => state.viewport);
     const { mouse } = useThree();
-    const { settings } = useAdaptiveQuality();
-    const frameThrottle = useRef(0);
+    const isMobile = width < 6.0;
 
-    const isMobile = width < 6.0; 
+    // Mobile: Always use high performance settings
+    const adaptiveSettings = useAdaptiveQuality();
+    const settings = isMobile ? {
+        level: 'high' as const,
+        transmissionSamples: 8,
+        transmissionResolution: 1024,
+        geometryDetail: 1.0,
+        shadowsEnabled: true,
+        particleCount: 1.0,
+        updateThrottle: 1,
+    } : adaptiveSettings.settings;
+    const frameThrottle = useRef(0); 
     
     // Font URL for 3D Text
     const fontUrl = 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/fonts/helvetiker_bold.typeface.json';
@@ -444,9 +454,20 @@ const DesktopProductPanel = () => {
 export const PrismaticArtifact = () => {
     const groupRef = useRef<THREE.Group>(null);
     const { height, width } = useThree((state) => state.viewport);
-    const { settings } = useAdaptiveQuality();
-    const frameThrottle = useRef(0);
     const isMobile = width < 6.0;
+
+    // Mobile: Always use high performance settings
+    const adaptiveSettings = useAdaptiveQuality();
+    const settings = isMobile ? {
+        level: 'high' as const,
+        transmissionSamples: 8,
+        transmissionResolution: 1024,
+        geometryDetail: 1.0,
+        shadowsEnabled: true,
+        particleCount: 1.0,
+        updateThrottle: 1,
+    } : adaptiveSettings.settings;
+    const frameThrottle = useRef(0);
 
     useFrame((state) => {
         if (!isMobile) {
@@ -490,9 +511,20 @@ export const KineticGrid = () => {
     const meshRef = useRef<THREE.InstancedMesh>(null);
     const { height, width } = useThree((state) => state.viewport);
     const scroll = useScroll();
-    const { settings } = useAdaptiveQuality();
-    const frameThrottle = useRef(0);
     const isMobile = width < 6.0;
+
+    // Mobile: Always use high performance settings
+    const adaptiveSettings = useAdaptiveQuality();
+    const settings = isMobile ? {
+        level: 'high' as const,
+        transmissionSamples: 8,
+        transmissionResolution: 1024,
+        geometryDetail: 1.0,
+        shadowsEnabled: true,
+        particleCount: 1.0,
+        updateThrottle: 1,
+    } : adaptiveSettings.settings;
+    const frameThrottle = useRef(0);
 
     const count = Math.round((isMobile ? 8 : 16) * settings.geometryDetail);
     const total = count * count;
@@ -572,9 +604,20 @@ export const KineticGrid = () => {
 export const Singularity = ({ colorStart = '#ff3300', colorEnd = '#000000', scale = 1.0 }: { colorStart?: string, colorEnd?: string, scale?: number }) => {
     const blackHoleRef = useRef<THREE.Mesh>(null);
     const { height, width } = useThree((state) => state.viewport);
-    const { settings } = useAdaptiveQuality();
-    const frameThrottle = useRef(0);
     const isMobile = width < 6.0;
+
+    // Mobile: Always use high performance settings
+    const adaptiveSettings = useAdaptiveQuality();
+    const settings = isMobile ? {
+        level: 'high' as const,
+        transmissionSamples: 8,
+        transmissionResolution: 1024,
+        geometryDetail: 1.0,
+        shadowsEnabled: true,
+        particleCount: 1.0,
+        updateThrottle: 1,
+    } : adaptiveSettings.settings;
+    const frameThrottle = useRef(0);
     const particleCount = Math.round((isMobile ? 1500 : 3500) * settings.particleCount); 
     
     // Allow color override via props or default
@@ -692,8 +735,19 @@ const ScrollSnapHandler = () => {
 
 export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => void }) => {
     const { height, width } = useThree((state) => state.viewport);
-    const { settings } = useAdaptiveQuality();
     const isMobile = width < 6.0;
+
+    // Mobile: Always use high performance settings
+    const adaptiveSettings = useAdaptiveQuality();
+    const settings = isMobile ? {
+        level: 'high' as const,
+        transmissionSamples: 8,
+        transmissionResolution: 1024,
+        geometryDetail: 1.0,
+        shadowsEnabled: true,
+        particleCount: 1.0,
+        updateThrottle: 1,
+    } : adaptiveSettings.settings;
 
     return (
         <ScrollControls pages={TOTAL_PAGES} damping={isMobile ? 0 : 0.1}>
@@ -701,7 +755,7 @@ export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => vo
             <CameraRig />
 
             <Sparkles
-                count={Math.round((isMobile ? 200 : 400) * settings.particleCount)}
+                count={isMobile ? 150 : Math.round(400 * settings.particleCount)}
                 scale={[width * 2, height * TOTAL_PAGES * 1.2, 20]}
                 size={isMobile ? 3 : 4}
                 speed={0.4}
@@ -744,7 +798,20 @@ export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => vo
 };
 
 export const AmbientScene = () => {
-    const { settings } = useAdaptiveQuality();
+    const { width } = useThree((state) => state.viewport);
+    const isMobile = width < 6.0;
+
+    // Mobile: Always use high performance settings
+    const adaptiveSettings = useAdaptiveQuality();
+    const settings = isMobile ? {
+        level: 'high' as const,
+        transmissionSamples: 8,
+        transmissionResolution: 1024,
+        geometryDetail: 1.0,
+        shadowsEnabled: true,
+        particleCount: 1.0,
+        updateThrottle: 1,
+    } : adaptiveSettings.settings;
     const frameThrottle = useRef(0);
 
     useFrame((state) => {
