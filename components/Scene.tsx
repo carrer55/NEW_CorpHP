@@ -669,12 +669,12 @@ export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => vo
             {/* Full-screen Starfield Background */}
             <Sparkles
                 count={isMobile ? 150 : 300}
-                scale={[width * 2, height * TOTAL_PAGES, 20]}
+                scale={[width * 2, height * TOTAL_PAGES * 1.2, 20]}
                 size={isMobile ? 3 : 4}
                 speed={0.4}
                 opacity={0.5}
                 color="#ffffff"
-                position={[0, -height * (TOTAL_PAGES / 2), -5]}
+                position={[0, -height * (TOTAL_PAGES / 2) + height, -5]}
             />
 
             {/* Hero Composition: .FOUND */}
