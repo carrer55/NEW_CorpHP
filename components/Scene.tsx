@@ -124,7 +124,7 @@ const HeroComposition = () => {
 
     // Vertical Layout (Both Desktop and Mobile)
     const sphereStartY = 0.7;
-    const textY = sphereStartY - 0.65 - 0.4; 
+    const textY = isMobile ? (sphereStartY - 0.65 - 0.4) : (sphereStartY - 0.4); 
     
     // Unified Crystal Material Settings (Performance Optimized)
     const crystalMaterialProps = {
