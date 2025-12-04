@@ -379,19 +379,21 @@ const HeroComposition = () => {
     );
 };
 
-// Desktop Product Object with cursor-following animation
-const DesktopProductObject = () => {
+// Desktop Product Panel with cursor-following animation (based on mobile version)
+const DesktopProductPanel = () => {
     const groupRef = useRef<THREE.Group>(null);
+    const materialRef = useRef<THREE.MeshStandardMaterial>(null);
     const { height } = useThree((state) => state.viewport);
     const { mouse } = useThree((state) => state);
+    const texture = useTexture("https://images.unsplash.com/photo-1550684848-fac1c5b4e853?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80");
 
-    useFrame((state) => {
-        if (groupRef.current) {
-            const time = state.clock.elapsedTime;
+    useFrame((state, delta) => {
+        const time = state.clock.elapsedTime;
 
-            // Slow idle floating animation
-            const floatY = Math.sin(time * 0.3) * 0.15;
-            const floatZ = Math.cos(time * 0.25) * 0.08;
+        if (groupRef.current && materialRef.current) {
+            // Gentle floating animation
+            const hoverY = Math.sin(time * 0.3) * 0.1;
+            const hoverZ = Math.cos(time * 0.25) * 0.08;
 
             // Very gentle mouse parallax (cursor following)
             const parallaxX = mouse.x * 0.3; // Slow horizontal movement
@@ -399,34 +401,39 @@ const DesktopProductObject = () => {
 
             // Apply combined position
             groupRef.current.position.x = parallaxX;
-            groupRef.current.position.y = floatY + parallaxY;
-            groupRef.current.position.z = -1.5 + floatZ;
+            groupRef.current.position.y = hoverY + parallaxY;
+            groupRef.current.position.z = -1.5 + hoverZ;
 
-            // Very slow rotation for showcase
-            groupRef.current.rotation.y = Math.sin(time * 0.15) * 0.1;
-            groupRef.current.rotation.x = Math.cos(time * 0.12) * 0.05;
-            groupRef.current.rotation.z = Math.sin(time * 0.1) * 0.02;
+            // Very slow, majestic rotation
+            groupRef.current.rotation.x = Math.cos(time * 0.2) * 0.05;
+            groupRef.current.rotation.y = Math.sin(time * 0.25) * 0.12;
+            groupRef.current.rotation.z = Math.sin(time * 0.15) * 0.02;
+
+            // Ensure full opacity
+            materialRef.current.opacity = 1;
         }
     });
 
     return (
         <group position={[0, POS_PRODUCTS * height, 0]}>
-            <pointLight position={[3, 2, 2]} intensity={2} color="#00ffff" distance={10} />
-            <pointLight position={[-3, -2, 2]} intensity={2} color="#ff9900" distance={10} />
+            {/* Dynamic Lights for the panel */}
+            <pointLight position={[3, 2, 4]} intensity={1.5} color="#00ffff" distance={10} />
+            <pointLight position={[-3, -2, -4]} intensity={1.5} color="#ff9900" distance={10} />
 
-            <group ref={groupRef}>
-                <mesh scale={2.5}>
-                    <icosahedronGeometry args={[1, 0]} />
-                    <MeshTransmissionMaterial
-                        backside
-                        samples={6}
-                        thickness={0.8}
-                        chromaticAberration={1.2}
-                        anisotropy={0.3}
-                        distortion={0.6}
-                        iridescence={1}
+            {/* The Holographic Image Panel */}
+            <group ref={groupRef} position={[0, 0, -1.5]} scale={1}>
+                <mesh>
+                    <boxGeometry args={[2.5, 3.2, 0.1]} />
+                    <meshStandardMaterial
+                        ref={materialRef}
+                        map={texture}
                         roughness={0.1}
-                        color="#e0e0ff"
+                        metalness={0.6}
+                        emissiveMap={texture}
+                        emissiveIntensity={0.2}
+                        color="#ffffff"
+                        transparent
+                        opacity={1}
                     />
                 </mesh>
             </group>
@@ -671,8 +678,8 @@ export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => vo
             <HeroComposition />
             <Sparkles count={50} scale={10} size={4} speed={0.4} opacity={0.5} color="#ffffff" />
 
-            {/* Desktop Product Object with cursor-following */}
-            {!isMobile && <DesktopProductObject />}
+            {/* Desktop Product Panel with cursor-following */}
+            {!isMobile && <DesktopProductPanel />}
 
             {/* Mobile: Keep DistortedImage */}
             {isMobile && (
