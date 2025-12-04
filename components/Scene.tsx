@@ -666,9 +666,19 @@ export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => vo
             <ScrollSnapHandler />
             <CameraRig />
 
+            {/* Full-screen Starfield Background */}
+            <Sparkles
+                count={isMobile ? 150 : 300}
+                scale={[width * 2, height * TOTAL_PAGES, 20]}
+                size={isMobile ? 3 : 4}
+                speed={0.4}
+                opacity={0.5}
+                color="#ffffff"
+                position={[0, -height * (TOTAL_PAGES / 2), -5]}
+            />
+
             {/* Hero Composition: .FOUND */}
             <HeroComposition />
-            <Sparkles count={50} scale={10} size={4} speed={0.4} opacity={0.5} color="#ffffff" />
 
             {/* Desktop Product Panel with cursor-following */}
             {!isMobile && <DesktopProductPanel />}
