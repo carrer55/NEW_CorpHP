@@ -379,46 +379,34 @@ const HeroComposition = () => {
     );
 };
 
-// Desktop Product Panel - Similar to mobile but scroll-based
+// Desktop Product Panel - Cursor-following floating panel
 export const DesktopProductPanel = () => {
     const groupRef = useRef<THREE.Group>(null);
     const materialRef = useRef<THREE.MeshStandardMaterial>(null);
-    const scroll = useScroll();
-    const { height, width } = useThree((state) => state.viewport);
-    const isMobile = width < 6.0;
+    const { height, mouse } = useThree((state) => state);
     const texture = useTexture("https://images.unsplash.com/photo-1550684848-fac1c5b4e853?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80");
 
     useFrame((state) => {
         if (!groupRef.current || !materialRef.current) return;
         const time = state.clock.elapsedTime;
 
-        // Calculate scroll progress for Products section
-        const productsPagePos = Math.abs(POS_PRODUCTS);
-        const startOffset = Math.max(0, productsPagePos - 0.5) / (TOTAL_PAGES - 1);
-        const duration = 1.5 / (TOTAL_PAGES - 1);
-        const progress = scroll?.curve(startOffset, duration) || 0;
-
-        // Entry animation
-        const entryEase = THREE.MathUtils.smoothstep(progress, 0, 1);
-
-        // Position: Float at standard depth with gentle hover
+        // Gentle hover animation
         const hoverY = Math.sin(time * 0.3) * 0.1;
-        groupRef.current.position.y = hoverY;
-        groupRef.current.position.z = THREE.MathUtils.lerp(-5, -1.5, entryEase);
 
-        // Rotation: Slow, majestic rotation
+        // Cursor parallax effect - subtle response to mouse movement
+        const parallaxX = mouse.x * 0.15; // Reduced influence for subtle effect
+        const parallaxY = mouse.y * 0.1;
+
+        groupRef.current.position.set(parallaxX, hoverY + parallaxY, -1.5);
+
+        // Slow, majestic rotation
         groupRef.current.rotation.x = Math.cos(time * 0.2) * 0.05;
         groupRef.current.rotation.y = Math.sin(time * 0.25) * 0.12;
         groupRef.current.rotation.z = Math.sin(time * 0.15) * 0.02;
-
-        // Scale & Opacity: Fade in
-        const targetScale = entryEase;
-        groupRef.current.scale.setScalar(targetScale);
-        materialRef.current.opacity = entryEase;
     });
 
     return (
-        <group position={[-2.5, POS_PRODUCTS * height, 0]}>
+        <group position={[-1.0, POS_PRODUCTS * height, 0]}>
             {/* Background Stars */}
             <Sparkles count={60} scale={8} size={4} speed={0.2} opacity={0.5} color="#ffffff" />
             <Float speed={0.3} rotationIntensity={0.2} floatIntensity={0.2}>
@@ -430,7 +418,7 @@ export const DesktopProductPanel = () => {
             <pointLight position={[-3, -2, -4]} intensity={1.5} color="#ff9900" distance={10} />
 
             {/* The Holographic Image Panel */}
-            <group ref={groupRef} position={[0, 0, -5]} scale={0}>
+            <group ref={groupRef} position={[0, 0, -1.5]}>
                 <mesh>
                     <boxGeometry args={[2.8, 3.6, 0.1]} />
                     <meshStandardMaterial
@@ -442,7 +430,7 @@ export const DesktopProductPanel = () => {
                         emissiveIntensity={0.2}
                         color="#ffffff"
                         transparent
-                        opacity={0}
+                        opacity={1}
                     />
                 </mesh>
             </group>
