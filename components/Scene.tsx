@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree, extend } from '@react-three/fiber';
-import { useScroll, Environment, Float, Sparkles, MeshTransmissionMaterial, shaderMaterial, ScrollControls, Scroll, Text3D, Center } from '@react-three/drei';
+import { useScroll, Environment, Float, Sparkles, MeshTransmissionMaterial, shaderMaterial, ScrollControls, Scroll, Text3D, Center, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { DistortedImage } from './DistortedImage';
 import { Overlay } from './Overlay';
