@@ -755,7 +755,7 @@ export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => vo
             <CameraRig />
 
             <Sparkles
-                count={isMobile ? 150 : Math.round(400 * settings.particleCount)}
+                count={isMobile ? 150 : 300}
                 scale={[width * 2, height * TOTAL_PAGES * 1.2, 20]}
                 size={isMobile ? 3 : 4}
                 speed={0.4}
