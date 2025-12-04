@@ -513,7 +513,7 @@ export const KineticGrid = () => {
     const scroll = useScroll();
     const isMobile = width < 6.0;
 
-    // Mobile: Always use high performance settings
+    // Always use high performance settings for consistent grid size
     const adaptiveSettings = useAdaptiveQuality();
     const settings = isMobile ? {
         level: 'high' as const,
@@ -523,7 +523,15 @@ export const KineticGrid = () => {
         shadowsEnabled: true,
         particleCount: 1.0,
         updateThrottle: 1,
-    } : adaptiveSettings.settings;
+    } : {
+        level: 'high' as const,
+        transmissionSamples: 8,
+        transmissionResolution: 1024,
+        geometryDetail: 1.0,
+        shadowsEnabled: true,
+        particleCount: 1.0,
+        updateThrottle: adaptiveSettings.settings.updateThrottle,
+    };
     const frameThrottle = useRef(0);
 
     const count = Math.round((isMobile ? 8 : 16) * settings.geometryDetail);
