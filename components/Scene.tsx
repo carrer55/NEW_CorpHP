@@ -406,7 +406,7 @@ const DesktopProductPanelInner = () => {
     });
 
     return (
-        <group position={[0, POS_PRODUCTS * height, -2]}>
+        <group position={[-2.5, POS_PRODUCTS * height, 1]}>
             {/* Background Stars */}
             <Sparkles count={60} scale={8} size={4} speed={0.2} opacity={0.5} color="#ffffff" />
             <Float speed={0.3} rotationIntensity={0.2} floatIntensity={0.2}>
@@ -414,24 +414,35 @@ const DesktopProductPanelInner = () => {
             </Float>
 
             {/* Dynamic Lights */}
-            <pointLight position={[3, 2, 2]} intensity={2} color="#00ffff" distance={10} />
-            <pointLight position={[-3, -2, 2]} intensity={2} color="#ff9900" distance={10} />
+            <pointLight position={[2, 1, 3]} intensity={3} color="#00ffff" distance={12} />
+            <pointLight position={[-2, -1, 3]} intensity={3} color="#ff9900" distance={12} />
+            <pointLight position={[0, 0, 4]} intensity={2} color="#ffffff" distance={10} />
 
             {/* The Holographic Image Panel */}
             <group ref={groupRef} position={[0, 0, 0]}>
                 <mesh>
-                    <boxGeometry args={[3.0, 3.8, 0.1]} />
+                    <boxGeometry args={[4.0, 5.0, 0.15]} />
                     <meshStandardMaterial
                         ref={materialRef}
                         map={texture}
-                        roughness={0.1}
-                        metalness={0.6}
+                        roughness={0.05}
+                        metalness={0.8}
                         emissiveMap={texture}
-                        emissiveIntensity={0.3}
+                        emissiveIntensity={0.4}
                         color="#ffffff"
                         transparent
-                        opacity={1}
+                        opacity={0.95}
                         side={THREE.DoubleSide}
+                    />
+                </mesh>
+                <mesh position={[0, 0, -0.08]}>
+                    <boxGeometry args={[4.1, 5.1, 0.02]} />
+                    <meshStandardMaterial
+                        color="#00ffff"
+                        emissive="#00ffff"
+                        emissiveIntensity={0.5}
+                        transparent
+                        opacity={0.3}
                     />
                 </mesh>
             </group>
