@@ -128,18 +128,19 @@ const HeroComposition = () => {
     
     // Unified Crystal Material Settings (Performance Optimized)
     const crystalMaterialProps = {
-        samples: isMobile ? 3 : 4,
-        resolution: isMobile ? 256 : 512,
-        thickness: 1.2,
-        chromaticAberration: 0.3,
-        anisotropy: 0.3,
-        distortion: 0.3,
-        distortionScale: 0.4,
-        temporalDistortion: 0.15,
-        iridescence: 0.3,
-        iridescenceIOR: 1.1,
-        iridescenceThicknessRange: [0, 1000] as [number, number],
-        roughness: 0.05,
+        samples: isMobile ? 2 : 3,
+        resolution: isMobile ? 256 : 384,
+        thickness: 0.5,
+        chromaticAberration: 0.0,
+        anisotropy: 0.1,
+        distortion: 0.1,
+        distortionScale: 0.2,
+        temporalDistortion: 0.05,
+        iridescence: 0.0,
+        iridescenceIOR: 1.0,
+        iridescenceThicknessRange: [0, 500] as [number, number],
+        roughness: 0.0,
+        transmission: 1.0,
         color: "#ffffff",
         background: new THREE.Color('#000000'),
         toneMapped: false,
@@ -238,15 +239,15 @@ const HeroComposition = () => {
                     const pulse = (Math.sin(time * 1.1) + 1) * 0.5;
                     const impactDistortion = Math.sin(absorbEase * Math.PI) * 1.2;
 
-                    sphereMatRef.current.chromaticAberration = 0.3 + pulse * 0.5 + impactDistortion * 1.5;
+                    sphereMatRef.current.chromaticAberration = THREE.MathUtils.lerp(0.0, 0.8, absorbEase) + pulse * 0.3 + impactDistortion * 1.0;
 
-                    const baseDistortion = THREE.MathUtils.lerp(crystalMaterialProps.distortion, 0.7, absorbEase);
-                    sphereMatRef.current.distortion = baseDistortion + pulse * 0.25 + impactDistortion * 0.6;
+                    const baseDistortion = THREE.MathUtils.lerp(0.1, 0.7, absorbEase);
+                    sphereMatRef.current.distortion = baseDistortion + pulse * 0.2 + impactDistortion * 0.5;
 
-                    sphereMatRef.current.thickness = 1.2 + Math.cos(time * 0.7) * 0.25;
+                    sphereMatRef.current.thickness = THREE.MathUtils.lerp(0.5, 1.5, absorbEase) + Math.cos(time * 0.7) * 0.2;
 
-                    sphereMatRef.current.iridescence = THREE.MathUtils.lerp(0.3, 0.8, absorbEase);
-                    sphereMatRef.current.roughness = THREE.MathUtils.lerp(0.05, 0.15, absorbEase);
+                    sphereMatRef.current.iridescence = THREE.MathUtils.lerp(0.0, 0.8, absorbEase);
+                    sphereMatRef.current.roughness = THREE.MathUtils.lerp(0.0, 0.15, absorbEase);
                 }
 
                 // --- Text Behavior (Sucked into the background sphere) ---
@@ -279,12 +280,11 @@ const HeroComposition = () => {
                     textGroupRef.current.rotation.x = THREE.MathUtils.lerp(0, Math.PI / 6, moveEase);
                     textGroupRef.current.rotation.z = THREE.MathUtils.lerp(0, -Math.PI / 4, moveEase);
 
-                    // 5. Text Material (Liquify and dissolve)
+                    // 5. Text Material (Fade and dissolve)
                     if (textMatRef.current) {
-                        textMatRef.current.distortion = THREE.MathUtils.lerp(0.15, 4.5, moveEase);
-                        textMatRef.current.thickness = THREE.MathUtils.lerp(1.5, 0.0, moveEase);
-                        textMatRef.current.chromaticAberration = THREE.MathUtils.lerp(0.6, 6.0, moveEase);
+                        textMatRef.current.transmission = THREE.MathUtils.lerp(0.1, 1.0, moveEase);
                         textMatRef.current.opacity = THREE.MathUtils.lerp(1.0, 0.0, moveEase);
+                        textMatRef.current.metalness = THREE.MathUtils.lerp(0.9, 0.2, moveEase);
                     }
                 }
             }
@@ -322,8 +322,9 @@ const HeroComposition = () => {
                     position={[0, textY, isMobile ? 0 : 0.5]}
                 >
                     {/* Dynamic Lighting for both Mobile and Desktop to ensure consistent design */}
-                    <pointLight position={[-2, 1, 2]} intensity={isMobile ? 6 : 8} color="#ffaaee" distance={5} />
-                    <pointLight position={[2, -1, 1]} intensity={isMobile ? 6 : 8} color="#aaddff" distance={5} />
+                    <spotLight position={[-3, 2, 3]} intensity={isMobile ? 15 : 20} angle={0.5} penumbra={0.8} color="#ffffff" distance={8} />
+                    <spotLight position={[3, -1, 2]} intensity={isMobile ? 12 : 16} angle={0.6} penumbra={0.7} color="#e8f0ff" distance={7} />
+                    <pointLight position={[0, -2, -2]} intensity={isMobile ? 3 : 4} color="#4488ff" distance={6} />
                     
                     <Center>
                         <Text3D
@@ -339,23 +340,18 @@ const HeroComposition = () => {
                             letterSpacing={-0.03}
                         >
                             FOUND
-                            <MeshTransmissionMaterial
+                            <meshPhysicalMaterial
                                 ref={textMatRef}
-                                backside
-                                samples={isMobile ? 3 : 6}
-                                resolution={isMobile ? 256 : 512}
-                                thickness={1.5}
-                                roughness={0.05}
-                                chromaticAberration={0.6}
-                                anisotropy={0.4}
-                                distortion={0.15}
-                                distortionScale={0.25}
-                                temporalDistortion={0.08}
-                                iridescence={0.9}
-                                iridescenceIOR={1.3}
-                                iridescenceThicknessRange={[0, 1200] as [number, number]}
-                                color="#c8d4e8"
-                                metalness={0.2}
+                                color="#e8f0ff"
+                                metalness={0.9}
+                                roughness={0.08}
+                                clearcoat={1.0}
+                                clearcoatRoughness={0.05}
+                                reflectivity={1.0}
+                                ior={2.4}
+                                thickness={0.5}
+                                transmission={0.1}
+                                envMapIntensity={1.2}
                                 toneMapped={false}
                             />
                         </Text3D>
