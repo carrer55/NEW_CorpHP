@@ -111,9 +111,11 @@ const HeroComposition = () => {
     const targetColor = useMemo(() => new THREE.Color('#ffffff'), []);
 
     // --- Responsive Configuration ---
-    
-    // Size: Bigger sphere on mobile to look like a planet
-    const sphereStartScale = isMobile ? 0.45 : 0.20; 
+
+    // Size: Maintain consistent sphere-to-text ratio across devices
+    // Mobile: 0.45 sphere with ~0.72 text (width * 0.18 when width ≈ 4) = ratio ~0.625
+    // Desktop: 0.9 text * 0.625 ratio = 0.56 sphere
+    const sphereStartScale = isMobile ? 0.45 : 0.60; 
     
     // Text Size: Adjusted to ensure it fits on screen without cutoff
     const textSize = isMobile ? width * 0.18 : 0.9;
