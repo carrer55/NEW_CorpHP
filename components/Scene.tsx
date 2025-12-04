@@ -214,14 +214,9 @@ const HeroComposition = () => {
                 const floatY = Math.sin(time * 0.45) * 0.08 + Math.cos(time * 0.25) * 0.04;
                 const floatX = Math.cos(time * 0.35) * 0.04;
 
-                // Mouse Parallax with depth effect (stronger parallax for background elements)
-                const mouseInfluence = THREE.MathUtils.lerp(0.3, 0.08, absorbEase);
-                const parallaxX = mouse.x * mouseInfluence * 0.3;
-                const parallaxY = mouse.y * mouseInfluence * 0.3;
-
                 sphereRef.current.position.set(
-                    floatX + parallaxX,
-                    currentY + floatY + parallaxY,
+                    floatX,
+                    currentY + floatY,
                     currentZ
                 );
 
