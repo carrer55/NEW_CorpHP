@@ -119,20 +119,10 @@ const HeroComposition = () => {
     const textSize = isMobile ? width * 0.18 : 0.9;
     
     // --- Layout Calculations ---
-    
-    // Desktop: Horizontal Layout
-    const desktopSphereRadius = 0.20;
-    const desktopTextApproxWidth = 0.9 * 4.2;
-    const desktopGap = 0.5;
-    const desktopTotalWidth = (desktopSphereRadius * 2) + desktopGap + desktopTextApproxWidth;
-    
-    const desktopGroupStartX = -desktopTotalWidth / 2;
-    const desktopSphereStartX = desktopGroupStartX + desktopSphereRadius;
-    const desktopTextStartX = desktopGroupStartX + (desktopSphereRadius * 2) + desktopGap + (desktopTextApproxWidth / 2);
-    
-    // Mobile: Vertical Layout
-    const mobileSphereStartY = 0.7; 
-    const mobileTextY = mobileSphereStartY - 0.45 - 0.4; 
+
+    // Vertical Layout (Both Desktop and Mobile)
+    const sphereStartY = 0.7;
+    const textY = sphereStartY - 0.65 - 0.4; 
     
     // Unified Crystal Material Settings (Performance Optimized)
     const crystalMaterialProps = {
@@ -169,9 +159,9 @@ const HeroComposition = () => {
                 const p2Start = 0.15 * (6 / TOTAL_PAGES);
                 const phase1 = scroll.range(0, p1End);
                 const phase2 = scroll.range(p2Start, 0.15 * (6 / TOTAL_PAGES));
-                
-                const startY = mobileSphereStartY;
-                const textY = mobileTextY;
+
+                const startY = sphereStartY;
+                const targetTextY = textY;
                 const arrowY = -height / 2 + 0.5;
 
                 const startScale = sphereStartScale;
@@ -181,15 +171,15 @@ const HeroComposition = () => {
                 let targetY, targetScale, targetZ;
 
                 if (phase2 > 0) {
-                    const p2Ease = Math.pow(phase2, 2); 
-                    targetY = THREE.MathUtils.lerp(textY, arrowY, p2Ease);
+                    const p2Ease = Math.pow(phase2, 2);
+                    targetY = THREE.MathUtils.lerp(targetTextY, arrowY, p2Ease);
                     targetScale = THREE.MathUtils.lerp(maxScale, endScale, p2Ease);
-                    targetZ = THREE.MathUtils.lerp(2.0, 0, p2Ease); 
+                    targetZ = THREE.MathUtils.lerp(2.0, 0, p2Ease);
                 } else {
                     const p1Ease = THREE.MathUtils.smoothstep(phase1, 0, 1);
-                    targetY = THREE.MathUtils.lerp(startY, textY, p1Ease);
+                    targetY = THREE.MathUtils.lerp(startY, targetTextY, p1Ease);
                     targetScale = THREE.MathUtils.lerp(startScale, maxScale, p1Ease);
-                    targetZ = THREE.MathUtils.lerp(0, 2.0, p1Ease); 
+                    targetZ = THREE.MathUtils.lerp(0, 2.0, p1Ease);
                 }
                 
                 sphereRef.current.position.set(0, targetY, targetZ);
@@ -201,17 +191,18 @@ const HeroComposition = () => {
                 sphereRef.current.rotation.z = ease * Math.PI * 0.5;
 
             } else {
-                // ** Desktop: Innovative Liquid Absorption Animation **
-                
+                // ** Desktop: Liquid Absorption Animation with Vertical Layout **
+
                 // Define specific scroll range for the absorption event
-                // It starts immediately (0) and happens fast (0.15 relative to page 1)
                 const absorptionProgress = scroll.range(0, 1.5 / TOTAL_PAGES);
                 const absorbEase = THREE.MathUtils.smoothstep(absorptionProgress, 0, 1);
-                const absorbAggressive = Math.pow(absorbEase, 3); // Faster end
+                const absorbAggressive = Math.pow(absorbEase, 3);
 
-                // 1. Sphere Position: Stays relatively stable but floats
-                const currentY = THREE.MathUtils.lerp(-0.3, 0, absorbEase);
-                const currentZ = THREE.MathUtils.lerp(0, 0.5, absorbEase);
+                // 1. Sphere Position: Vertical layout (sphere at top)
+                const startY = sphereStartY;
+                const targetSphereY = textY; // Move down towards text position
+                const currentY = THREE.MathUtils.lerp(startY, targetSphereY, absorbEase);
+                const currentZ = THREE.MathUtils.lerp(0, 1.0, absorbEase);
 
                 // Idle Floating
                 const floatY = Math.sin(time * 0.45) * 0.08 + Math.cos(time * 0.25) * 0.04;
@@ -223,15 +214,13 @@ const HeroComposition = () => {
                 const parallaxY = mouse.y * mouseInfluence * 0.2;
 
                 sphereRef.current.position.set(
-                    desktopSphereStartX + floatX + parallaxX, 
-                    currentY + floatY + parallaxY, 
+                    floatX + parallaxX,
+                    currentY + floatY + parallaxY,
                     currentZ
                 );
 
                 // 2. Sphere Growth (Absorbing Energy)
-                // Stays small for a split second, then grows as text enters
-                const targetScale = 2.5; 
-                // Delay growth slightly to match text impact
+                const targetScale = 2.5;
                 const growthCurve = THREE.MathUtils.smoothstep(absorptionProgress, 0.1, 0.9);
                 const currentScale = THREE.MathUtils.lerp(sphereStartScale, targetScale, growthCurve);
                 sphereRef.current.scale.setScalar(currentScale);
@@ -242,68 +231,56 @@ const HeroComposition = () => {
                 sphereRef.current.rotation.x = baseRotX;
                 sphereRef.current.rotation.y = baseRotY;
 
-                // 4. Sphere Material Reaction (The "Impact")
+                // 4. Sphere Material Reaction
                 if (sphereMatRef.current) {
                     sphereMatRef.current.color.lerpColors(initialColor, targetColor, absorbEase);
-                    
-                    // Fluid/Living Glass Effect
-                    const pulse = (Math.sin(time * 1.1) + 1) * 0.5; 
-                    
-                    // EXPLOSIVE Reaction during absorption
-                    // Distortion peaks when text hits (approx scroll 0.1-0.3)
-                    const impactDistortion = Math.sin(absorbEase * Math.PI) * 2.0; 
-                    
-                    // Intense Chromatic Aberration (Rainbows)
-                    sphereMatRef.current.chromaticAberration = 1.2 + pulse * 1.5 + impactDistortion * 3.0; 
-                    
-                    // Breathing Distortion
+
+                    const pulse = (Math.sin(time * 1.1) + 1) * 0.5;
+                    const impactDistortion = Math.sin(absorbEase * Math.PI) * 2.0;
+
+                    sphereMatRef.current.chromaticAberration = 1.2 + pulse * 1.5 + impactDistortion * 3.0;
+
                     const baseDistortion = THREE.MathUtils.lerp(crystalMaterialProps.distortion, 0.8, absorbEase);
                     sphereMatRef.current.distortion = baseDistortion + pulse * 0.4 + impactDistortion;
-                    
-                    // Breathing Thickness
+
                     sphereMatRef.current.thickness = 1.2 + Math.cos(time * 0.7) * 0.5;
                 }
 
-                // --- Text Behavior (The Victim) ---
+                // --- Text Behavior (Absorbed upwards) ---
                 if (textGroupRef.current) {
-                    // 1. Move into the Sphere
-                    const textStartPos = desktopTextStartX;
-                    const textEndPos = desktopSphereStartX; // Target the sphere center
-                    
-                    // Non-linear move: starts slow, accelerates into the sphere
+                    // 1. Move into the Sphere (from bottom to top)
+                    const textStartY = textY;
+                    const textEndY = targetSphereY;
+
                     const moveEase = Math.pow(absorbEase, 2);
-                    
+
                     // 2. Scale (Sucked in)
-                    // Stays visible for a bit, then shrinks rapidly to 0
-                    const scaleEase = Math.pow(absorbEase, 4); // Very late shrink
+                    const scaleEase = Math.pow(absorbEase, 4);
                     const currentTextScale = THREE.MathUtils.lerp(1, 0, scaleEase);
 
                     // 3. Floating (Dampened by scroll)
                     const floatDampen = 1.0 - absorbEase;
                     const tFloatY = (Math.sin(time * 0.5) * 0.1) * floatDampen;
                     const tFloatX = (Math.cos(time * 0.4) * 0.05) * floatDampen;
-                    
-                    // 4. Position Update
+
+                    // 4. Position Update (vertical movement)
                     textGroupRef.current.position.set(
-                        THREE.MathUtils.lerp(textStartPos, textEndPos, moveEase) + tFloatX,
-                        tFloatY,
-                        THREE.MathUtils.lerp(0, -2, absorbEase) // Move slightly back into sphere
+                        tFloatX,
+                        THREE.MathUtils.lerp(textStartY, textEndY, moveEase) + tFloatY,
+                        THREE.MathUtils.lerp(0, -2, absorbEase)
                     );
-                    
+
                     textGroupRef.current.scale.setScalar(currentTextScale);
-                    
-                    // 5. Rotation (Spin into the hole)
-                    // Rotate towards sphere center
+
+                    // 5. Rotation
                     textGroupRef.current.rotation.y = THREE.MathUtils.lerp(0, Math.PI, moveEase);
                     textGroupRef.current.rotation.z = THREE.MathUtils.lerp(0, -Math.PI / 4, moveEase);
 
                     // 6. Text Material (Liquify)
                     if (textMatRef.current) {
-                        // As it moves, it becomes more liquid/distorted
                         textMatRef.current.distortion = THREE.MathUtils.lerp(0.4, 4.0, moveEase);
                         textMatRef.current.thickness = THREE.MathUtils.lerp(1.5, 0.0, moveEase);
                         textMatRef.current.chromaticAberration = THREE.MathUtils.lerp(1.0, 5.0, moveEase);
-                        // Fade out opacity/transmission density
                         textMatRef.current.opacity = THREE.MathUtils.lerp(1.0, 0.0, moveEase);
                     }
                 }
@@ -325,23 +302,21 @@ const HeroComposition = () => {
                 floatingRange={[-0.05, 0.05]}
             >
                 {/* The Sphere */}
-                <mesh 
-                    ref={sphereRef} 
-                    position={isMobile ? [0, mobileSphereStartY, 0] : [desktopSphereStartX, -0.3, 0]}
-                    // Render order important for transparency
+                <mesh
+                    ref={sphereRef}
+                    position={[0, sphereStartY, 0]}
                 >
                     <sphereGeometry args={[1, 32, 32]} />
-                    <MeshTransmissionMaterial 
-                        ref={sphereMatRef} 
+                    <MeshTransmissionMaterial
+                        ref={sphereMatRef}
                         {...crystalMaterialProps}
                     />
                 </mesh>
 
                 {/* The Text */}
-                <group 
-                    ref={textGroupRef} 
-                    // Initial position
-                    position={isMobile ? [0, mobileTextY, 0] : [desktopTextStartX, 0, 0]}
+                <group
+                    ref={textGroupRef}
+                    position={[0, textY, 0]}
                 >
                     {/* Dynamic Lighting for both Mobile and Desktop to ensure consistent design */}
                     <pointLight position={[-2, 1, 2]} intensity={isMobile ? 8 : 10} color="#ffaaee" distance={5} />
