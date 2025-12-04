@@ -454,13 +454,13 @@ ${formData.message}`;
                 <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl md:text-6xl font-display font-bold mb-8 text-white">
                     お問い合わせ<br />ありがとうございました。
                 </motion.h1>
-                <motion.div variants={itemVariants} className="text-gray-300 leading-relaxed space-y-4 mb-16">
+                <motion.div variants={itemVariants} className="text-gray-300 leading-relaxed space-y-4 mb-12">
                     <p>確認後、3営業日以内にご連絡させていただきます。</p>
                     <p>3営業日を過ぎても返信がない場合は、<br className="md:hidden" />お手数ですが再度お問い合わせをお願いいたします。</p>
                 </motion.div>
-                
-                <motion.div variants={itemVariants}>
-                    <button 
+
+                <motion.div variants={itemVariants} className="mt-8">
+                    <button
                         onClick={() => onNavigate('HOME')}
                         className="relative group text-sm md:text-base font-mono text-gray-400 hover:text-white transition-colors duration-300 tracking-widest"
                         data-hover
