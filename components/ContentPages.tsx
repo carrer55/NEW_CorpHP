@@ -375,7 +375,8 @@ export const ContactPage = ({ onNavigate }: { onNavigate: (view: ViewState) => v
         email: '',
         company: '',
         phone: '',
-        message: ''
+        message: '',
+        _gotcha: ''
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -392,13 +393,19 @@ export const ContactPage = ({ onNavigate }: { onNavigate: (view: ViewState) => v
         setIsSending(true);
 
         try {
+            const submissionData = {
+                ...formData,
+                _subject: `【お問い合わせ】${formData.company} ${formData.name}様より`,
+                _replyto: formData.email
+            };
+
             const response = await fetch(FORM_ENDPOINT, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(submissionData)
             });
 
             if (response.ok) {
@@ -543,16 +550,30 @@ ${formData.message}`;
 
                 <div className="flex flex-col gap-2">
                     <label className="font-mono text-xs text-gray-500">お問い合わせ内容 *</label>
-                    <textarea 
+                    <textarea
                         name="message"
                         value={formData.message}
                         onChange={handleChange}
                         required
-                        rows={6} 
-                        className="bg-transparent border-b border-gray-700 py-3 md:py-4 text-base md:text-lg focus:border-white outline-none transition-colors resize-none" 
-                        placeholder="詳しい内容を記入してください" 
+                        rows={6}
+                        className="bg-transparent border-b border-gray-700 py-3 md:py-4 text-base md:text-lg focus:border-white outline-none transition-colors resize-none"
+                        placeholder="詳しい内容を記入してください"
                         data-hover
                     ></textarea>
+                </div>
+
+                {/* Honeypot field - hidden from humans but visible to bots */}
+                <div className="hidden">
+                    <label htmlFor="_gotcha">Don't fill this out if you're human:</label>
+                    <input
+                        type="text"
+                        name="_gotcha"
+                        id="_gotcha"
+                        value={formData._gotcha}
+                        onChange={handleChange}
+                        tabIndex={-1}
+                        autoComplete="off"
+                    />
                 </div>
 
                 <div className="pt-4" data-hover>
