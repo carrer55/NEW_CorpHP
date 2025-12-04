@@ -379,6 +379,60 @@ const HeroComposition = () => {
     );
 };
 
+// Desktop Product Object with cursor-following animation
+const DesktopProductObject = () => {
+    const groupRef = useRef<THREE.Group>(null);
+    const { height, mouse } = useThree((state) => state);
+
+    useFrame((state) => {
+        if (groupRef.current) {
+            const time = state.clock.elapsedTime;
+
+            // Slow idle floating animation
+            const floatY = Math.sin(time * 0.3) * 0.15;
+            const floatZ = Math.cos(time * 0.25) * 0.08;
+
+            // Very gentle mouse parallax (cursor following)
+            const parallaxX = mouse.x * 0.3; // Slow horizontal movement
+            const parallaxY = mouse.y * 0.15; // Subtle vertical movement
+
+            // Apply combined position
+            groupRef.current.position.x = parallaxX;
+            groupRef.current.position.y = floatY + parallaxY;
+            groupRef.current.position.z = -1.5 + floatZ;
+
+            // Very slow rotation for showcase
+            groupRef.current.rotation.y = Math.sin(time * 0.15) * 0.1;
+            groupRef.current.rotation.x = Math.cos(time * 0.12) * 0.05;
+            groupRef.current.rotation.z = Math.sin(time * 0.1) * 0.02;
+        }
+    });
+
+    return (
+        <group position={[0, POS_PRODUCTS * height, 0]}>
+            <pointLight position={[3, 2, 2]} intensity={2} color="#00ffff" distance={10} />
+            <pointLight position={[-3, -2, 2]} intensity={2} color="#ff9900" distance={10} />
+
+            <group ref={groupRef}>
+                <mesh scale={2.5}>
+                    <icosahedronGeometry args={[1, 0]} />
+                    <MeshTransmissionMaterial
+                        backside
+                        samples={6}
+                        thickness={0.8}
+                        chromaticAberration={1.2}
+                        anisotropy={0.3}
+                        distortion={0.6}
+                        iridescence={1}
+                        roughness={0.1}
+                        color="#e0e0ff"
+                    />
+                </mesh>
+            </group>
+        </group>
+    );
+};
+
 // Exporting to be reusable in MobileSwipeScroll
 export const PrismaticArtifact = () => {
     const groupRef = useRef<THREE.Group>(null);
@@ -399,12 +453,12 @@ export const PrismaticArtifact = () => {
         <group position={[isMobile ? 0 : -2.5, isMobile ? 0 : POS_PHILOSOPHY * height + 3.5, 0]} ref={groupRef}>
             <mesh scale={isMobile ? 1.5 : 2.2}>
                 <icosahedronGeometry args={[1, 0]} />
-                <MeshTransmissionMaterial 
+                <MeshTransmissionMaterial
                     backside
-                    samples={3} 
+                    samples={3}
                     thickness={0.5}
                     chromaticAberration={1}
-                    anisotropy={0.2} 
+                    anisotropy={0.2}
                     distortion={0.5}
                     iridescence={1}
                     roughness={0.1}
@@ -611,20 +665,24 @@ export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => vo
         <ScrollControls pages={TOTAL_PAGES} damping={isMobile ? 0 : 0.2}>
             <ScrollSnapHandler />
             <CameraRig />
-            
+
             {/* Hero Composition: .FOUND */}
             <HeroComposition />
             <Sparkles count={50} scale={10} size={4} speed={0.4} opacity={0.5} color="#ffffff" />
 
-            {/* Distorted Image Section */}
-            <group position={[0, POS_PRODUCTS * height, 0]}>
-                 <DistortedImage 
-                    position={[0, 0, -2]} 
-                    imgSrc="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                    // Reduced scale on mobile to prevent overlap with Screen 3
-                    scale={isMobile ? [2.5, 3.5 * 0.8, 1] : [3, 4, 1]}
-                 />
-            </group>
+            {/* Desktop Product Object with cursor-following */}
+            {!isMobile && <DesktopProductObject />}
+
+            {/* Mobile: Keep DistortedImage */}
+            {isMobile && (
+                <group position={[0, POS_PRODUCTS * height, 0]}>
+                    <DistortedImage
+                        position={[0, 0, -2]}
+                        imgSrc="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                        scale={[2.5, 3.5 * 0.8, 1]}
+                    />
+                </group>
+            )}
 
             {/* Prismatic Artifact */}
             <PrismaticArtifact />
