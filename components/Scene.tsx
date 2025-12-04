@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree, extend } from '@react-three/fiber';
-import { useScroll, Environment, Float, Sparkles, MeshTransmissionMaterial, shaderMaterial, ScrollControls, Scroll, Text3D, Center } from '@react-three/drei';
+import { useScroll, Environment, Float, Sparkles, MeshTransmissionMaterial, shaderMaterial, ScrollControls, Scroll, Text3D, Center, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import { DistortedImage } from './DistortedImage';
 import { Overlay } from './Overlay';
@@ -379,6 +379,77 @@ const HeroComposition = () => {
     );
 };
 
+// Desktop Product Panel - Similar to mobile but scroll-based
+export const DesktopProductPanel = () => {
+    const groupRef = useRef<THREE.Group>(null);
+    const materialRef = useRef<THREE.MeshStandardMaterial>(null);
+    const scroll = useScroll();
+    const { height, width } = useThree((state) => state.viewport);
+    const isMobile = width < 6.0;
+    const texture = useTexture("https://images.unsplash.com/photo-1550684848-fac1c5b4e853?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80");
+
+    useFrame((state) => {
+        if (!groupRef.current || !materialRef.current) return;
+        const time = state.clock.elapsedTime;
+
+        // Calculate scroll progress for Products section
+        const productsPagePos = Math.abs(POS_PRODUCTS);
+        const startOffset = Math.max(0, productsPagePos - 0.5) / (TOTAL_PAGES - 1);
+        const duration = 1.5 / (TOTAL_PAGES - 1);
+        const progress = scroll?.curve(startOffset, duration) || 0;
+
+        // Entry animation
+        const entryEase = THREE.MathUtils.smoothstep(progress, 0, 1);
+
+        // Position: Float at standard depth with gentle hover
+        const hoverY = Math.sin(time * 0.3) * 0.1;
+        groupRef.current.position.y = hoverY;
+        groupRef.current.position.z = THREE.MathUtils.lerp(-5, -1.5, entryEase);
+
+        // Rotation: Slow, majestic rotation
+        groupRef.current.rotation.x = Math.cos(time * 0.2) * 0.05;
+        groupRef.current.rotation.y = Math.sin(time * 0.25) * 0.12;
+        groupRef.current.rotation.z = Math.sin(time * 0.15) * 0.02;
+
+        // Scale & Opacity: Fade in
+        const targetScale = entryEase;
+        groupRef.current.scale.setScalar(targetScale);
+        materialRef.current.opacity = entryEase;
+    });
+
+    return (
+        <group position={[-2.5, POS_PRODUCTS * height, 0]}>
+            {/* Background Stars */}
+            <Sparkles count={60} scale={8} size={4} speed={0.2} opacity={0.5} color="#ffffff" />
+            <Float speed={0.3} rotationIntensity={0.2} floatIntensity={0.2}>
+                <Sparkles count={2} scale={10} size={12} speed={0.05} opacity={0.8} color="#ffffff" />
+            </Float>
+
+            {/* Dynamic Lights */}
+            <pointLight position={[3, 2, 4]} intensity={1.5} color="#00ffff" distance={10} />
+            <pointLight position={[-3, -2, -4]} intensity={1.5} color="#ff9900" distance={10} />
+
+            {/* The Holographic Image Panel */}
+            <group ref={groupRef} position={[0, 0, -5]} scale={0}>
+                <mesh>
+                    <boxGeometry args={[2.8, 3.6, 0.1]} />
+                    <meshStandardMaterial
+                        ref={materialRef}
+                        map={texture}
+                        roughness={0.1}
+                        metalness={0.6}
+                        emissiveMap={texture}
+                        emissiveIntensity={0.2}
+                        color="#ffffff"
+                        transparent
+                        opacity={0}
+                    />
+                </mesh>
+            </group>
+        </group>
+    );
+};
+
 // Exporting to be reusable in MobileSwipeScroll
 export const PrismaticArtifact = () => {
     const groupRef = useRef<THREE.Group>(null);
@@ -399,12 +470,12 @@ export const PrismaticArtifact = () => {
         <group position={[isMobile ? 0 : -2.5, isMobile ? 0 : POS_PHILOSOPHY * height + 3.5, 0]} ref={groupRef}>
             <mesh scale={isMobile ? 1.5 : 2.2}>
                 <icosahedronGeometry args={[1, 0]} />
-                <MeshTransmissionMaterial 
+                <MeshTransmissionMaterial
                     backside
-                    samples={3} 
+                    samples={3}
                     thickness={0.5}
                     chromaticAberration={1}
-                    anisotropy={0.2} 
+                    anisotropy={0.2}
                     distortion={0.5}
                     iridescence={1}
                     roughness={0.1}
@@ -616,15 +687,17 @@ export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => vo
             <HeroComposition />
             <Sparkles count={50} scale={10} size={4} speed={0.4} opacity={0.5} color="#ffffff" />
 
-            {/* Distorted Image Section */}
-            <group position={[0, POS_PRODUCTS * height, 0]}>
-                 <DistortedImage 
-                    position={[0, 0, -2]} 
-                    imgSrc="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                    // Reduced scale on mobile to prevent overlap with Screen 3
-                    scale={isMobile ? [2.5, 3.5 * 0.8, 1] : [3, 4, 1]}
-                 />
-            </group>
+            {/* Products Section */}
+            {!isMobile && <DesktopProductPanel />}
+            {isMobile && (
+                <group position={[0, POS_PRODUCTS * height, 0]}>
+                     <DistortedImage
+                        position={[0, 0, -2]}
+                        imgSrc="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                        scale={[2.5, 3.5 * 0.8, 1]}
+                     />
+                </group>
+            )}
 
             {/* Prismatic Artifact */}
             <PrismaticArtifact />
