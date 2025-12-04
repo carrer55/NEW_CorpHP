@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ViewState } from '../types';
 
@@ -7,7 +7,7 @@ interface NavbarProps {
     onNavigate: (view: ViewState) => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate }) => {
+export const Navbar: React.FC<NavbarProps> = memo(({ currentView, onNavigate }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const links: { id: ViewState; label: string }[] = [
@@ -27,14 +27,15 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate }) => {
 
     return (
         <>
-            <nav className="fixed top-0 left-0 w-full p-5 md:p-10 flex justify-between items-center z-50 mix-blend-difference text-white pointer-events-none">
-                <div 
+            <nav className="fixed top-0 left-0 w-full p-5 md:p-10 flex justify-between items-center z-50 mix-blend-difference text-white pointer-events-none" style={{ willChange: 'transform' }}>
+                <div
                     className="pointer-events-auto cursor-pointer relative z-50"
                     onClick={() => {
                         setIsMenuOpen(false);
                         onNavigate('HOME');
                     }}
                     data-hover
+                    style={{ willChange: 'transform' }}
                 >
                     <div className="text-xl md:text-3xl font-bold font-goudy tracking-tight">
                         .Found Inc.
@@ -51,11 +52,12 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate }) => {
                             <button
                                 key={link.id}
                                 onClick={() => onNavigate(link.id)}
-                                className={`relative group transition-colors duration-300 ${currentView === link.id ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+                                className={`relative group transition-transform duration-200 ${currentView === link.id ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                                 data-hover
+                                style={{ willChange: 'transform' }}
                             >
                                 {link.label}
-                                <span className={`absolute -bottom-2 left-0 w-full h-[2px] bg-white transform origin-left transition-transform duration-300 ${currentView === link.id ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
+                                <span className={`absolute -bottom-2 left-0 w-full h-[2px] bg-white transform origin-left transition-transform duration-200 ${currentView === link.id ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
                             </button>
                         ))}
                     </div>
@@ -109,4 +111,4 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate }) => {
             </AnimatePresence>
         </>
     );
-};
+});

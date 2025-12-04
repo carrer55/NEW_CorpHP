@@ -96,19 +96,19 @@ export function useAdaptiveQuality(initialQuality: QualityLevel = 'high') {
       if (checkCountRef.current >= 120) {
         const avgFPS = monitor.getAverageFPS();
 
-        if (avgFPS < 25 && quality !== 'low') {
+        if (avgFPS < 30 && quality !== 'low') {
           setQuality('low');
           setSettings(QUALITY_PRESETS.low);
           console.log('🎮 Performance: Switching to LOW quality (FPS:', Math.round(avgFPS), ')');
-        } else if (avgFPS < 40 && quality === 'high') {
+        } else if (avgFPS < 45 && quality === 'high') {
           setQuality('medium');
           setSettings(QUALITY_PRESETS.medium);
           console.log('🎮 Performance: Switching to MEDIUM quality (FPS:', Math.round(avgFPS), ')');
-        } else if (avgFPS > 55 && quality === 'medium') {
+        } else if (avgFPS > 58 && quality === 'medium') {
           setQuality('high');
           setSettings(QUALITY_PRESETS.high);
           console.log('🎮 Performance: Switching to HIGH quality (FPS:', Math.round(avgFPS), ')');
-        } else if (avgFPS > 45 && quality === 'low') {
+        } else if (avgFPS > 50 && quality === 'low') {
           setQuality('medium');
           setSettings(QUALITY_PRESETS.medium);
           console.log('🎮 Performance: Switching to MEDIUM quality (FPS:', Math.round(avgFPS), ')');

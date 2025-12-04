@@ -7,7 +7,7 @@ import { PrivacyPolicyPage } from './ContentPages';
 
 const Section = ({ children, className = "" }: { children?: React.ReactNode, className?: string }) => {
     return (
-        <section className={`h-screen w-screen p-6 md:p-20 flex flex-col justify-center snap-start snap-always mb-[50vh] last:mb-0 ${className}`}>
+        <section className={`h-screen w-screen p-6 md:p-20 flex flex-col justify-center snap-start snap-always mb-[50vh] last:mb-0 ${className}`} style={{ contain: 'layout style', willChange: 'transform' }}>
             {children}
         </section>
     );

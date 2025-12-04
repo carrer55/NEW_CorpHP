@@ -147,14 +147,17 @@ const HeroComposition = () => {
     }), [isMobile, settings]);
     
     useFrame((state) => {
-        frameThrottle.current++;
-        if (frameThrottle.current < settings.updateThrottle) return;
-        frameThrottle.current = 0;
+        // Reduced throttle for smoother desktop experience
+        if (!isMobile) {
+            frameThrottle.current++;
+            if (frameThrottle.current < Math.max(1, settings.updateThrottle - 1)) return;
+            frameThrottle.current = 0;
+        }
 
         const scaledRangeLimit = 0.25 * (6 / TOTAL_PAGES);
         const range = scroll.range(0, scaledRangeLimit);
         const ease = THREE.MathUtils.smoothstep(range, 0, 1);
-        const aggressiveEase = Math.pow(ease, 3);
+        const aggressiveEase = ease * ease * ease;
         const time = state.clock.elapsedTime;
         
         // --- Sphere Animation ---
@@ -332,12 +335,12 @@ const HeroComposition = () => {
                             font={fontUrl}
                             size={textSize}
                             height={isMobile ? 0.3 : 0.4}
-                            curveSegments={Math.round((isMobile ? 16 : 24) * settings.geometryDetail)}
+                            curveSegments={Math.round((isMobile ? 12 : 16) * settings.geometryDetail)}
                             bevelEnabled
                             bevelThickness={isMobile ? 0.03 : 0.05}
                             bevelSize={isMobile ? 0.01 : 0.02}
                             bevelOffset={0}
-                            bevelSegments={Math.round((isMobile ? 4 : 5) * settings.geometryDetail)}
+                            bevelSegments={Math.round((isMobile ? 3 : 4) * settings.geometryDetail)}
                             letterSpacing={-0.03}
                         >
                             FOUND
@@ -446,13 +449,16 @@ export const PrismaticArtifact = () => {
     const isMobile = width < 6.0;
 
     useFrame((state) => {
-        frameThrottle.current++;
-        if (frameThrottle.current < settings.updateThrottle) return;
-        frameThrottle.current = 0;
+        if (!isMobile) {
+            frameThrottle.current++;
+            if (frameThrottle.current < Math.max(1, settings.updateThrottle - 1)) return;
+            frameThrottle.current = 0;
+        }
 
         if (groupRef.current) {
-            groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
-            groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.3) * 0.1;
+            const time = state.clock.elapsedTime;
+            groupRef.current.rotation.y = time * 0.2;
+            groupRef.current.rotation.x = Math.sin(time * 0.3) * 0.1;
         }
     });
 
@@ -496,9 +502,11 @@ export const KineticGrid = () => {
     useFrame((state) => {
         if (!meshRef.current) return;
 
-        frameThrottle.current++;
-        if (frameThrottle.current < settings.updateThrottle) return;
-        frameThrottle.current = 0;
+        if (!isMobile) {
+            frameThrottle.current++;
+            if (frameThrottle.current < Math.max(1, settings.updateThrottle - 1)) return;
+            frameThrottle.current = 0;
+        }
 
         const time = state.clock.elapsedTime;
         
@@ -597,9 +605,11 @@ export const Singularity = ({ colorStart = '#ff3300', colorEnd = '#000000', scal
     }, [particleCount]);
 
     useFrame((state) => {
-        frameThrottle.current++;
-        if (frameThrottle.current < settings.updateThrottle) return;
-        frameThrottle.current = 0;
+        if (!isMobile) {
+            frameThrottle.current++;
+            if (frameThrottle.current < Math.max(1, settings.updateThrottle - 1)) return;
+            frameThrottle.current = 0;
+        }
 
         if (blackHoleRef.current) {
             // @ts-ignore
@@ -640,9 +650,9 @@ const CameraRig = () => {
     useFrame((state) => {
         const offset = scroll.offset;
         const targetY = -offset * (scroll.pages - 1) * height;
-        
-        // Faster lerp on mobile for swipe responsiveness
-        const lerpSpeed = isMobile ? 0.2 : 0.08;
+
+        // Faster lerp on mobile for swipe responsiveness, optimized desktop speed
+        const lerpSpeed = isMobile ? 0.2 : 0.15;
         state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, lerpSpeed);
 
         // Shake effect near Singularity
@@ -686,12 +696,12 @@ export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => vo
     const isMobile = width < 6.0;
 
     return (
-        <ScrollControls pages={TOTAL_PAGES} damping={isMobile ? 0 : 0.2}>
+        <ScrollControls pages={TOTAL_PAGES} damping={isMobile ? 0 : 0.1}>
             <ScrollSnapHandler />
             <CameraRig />
 
             <Sparkles
-                count={Math.round((isMobile ? 150 : 300) * settings.particleCount)}
+                count={Math.round((isMobile ? 200 : 400) * settings.particleCount)}
                 scale={[width * 2, height * TOTAL_PAGES * 1.2, 20]}
                 size={isMobile ? 3 : 4}
                 speed={0.4}
@@ -739,11 +749,12 @@ export const AmbientScene = () => {
 
     useFrame((state) => {
         frameThrottle.current++;
-        if (frameThrottle.current < settings.updateThrottle) return;
+        if (frameThrottle.current < Math.max(1, settings.updateThrottle - 1)) return;
         frameThrottle.current = 0;
 
-        state.camera.position.x = Math.sin(state.clock.elapsedTime * 0.1) * 0.5;
-        state.camera.position.y = Math.cos(state.clock.elapsedTime * 0.1) * 0.5;
+        const time = state.clock.elapsedTime;
+        state.camera.position.x = Math.sin(time * 0.1) * 0.5;
+        state.camera.position.y = Math.cos(time * 0.1) * 0.5;
         state.camera.lookAt(0, 0, 0);
     });
 
