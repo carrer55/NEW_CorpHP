@@ -1,0 +1,6 @@
+# OG画像（og-image.png）とファビコン（favicon.ico）をこのディレクトリに配置してください
+
+推奨サイズ：
+- og-image.png: 1200x630px
+- favicon.ico: 32x32px または 16x16px
+- apple-touch-icon.png: 180x180px（オプション）
