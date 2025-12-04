@@ -131,16 +131,16 @@ const HeroComposition = () => {
         samples: isMobile ? 3 : 4,
         resolution: isMobile ? 256 : 512,
         thickness: 1.5,
-        chromaticAberration: 1.0,
+        chromaticAberration: 0.5,
         anisotropy: 0.3,
         distortion: 0.4,
         distortionScale: 0.5,
         temporalDistortion: 0.2,
-        iridescence: 1,
+        iridescence: 0.6,
         iridescenceIOR: 1.2,
         iridescenceThicknessRange: [0, 1400] as [number, number],
-        roughness: 0.0,
-        color: "#eef2ff",
+        roughness: 0.15,
+        color: "#d0d7e8",
         background: new THREE.Color('#000000'),
         toneMapped: false,
     };
@@ -236,14 +236,14 @@ const HeroComposition = () => {
                     sphereMatRef.current.color.lerpColors(initialColor, targetColor, absorbEase);
 
                     const pulse = (Math.sin(time * 1.1) + 1) * 0.5;
-                    const impactDistortion = Math.sin(absorbEase * Math.PI) * 2.0;
+                    const impactDistortion = Math.sin(absorbEase * Math.PI) * 1.5;
 
-                    sphereMatRef.current.chromaticAberration = 1.2 + pulse * 1.5 + impactDistortion * 3.0;
+                    sphereMatRef.current.chromaticAberration = 0.5 + pulse * 0.8 + impactDistortion * 2.0;
 
                     const baseDistortion = THREE.MathUtils.lerp(crystalMaterialProps.distortion, 0.8, absorbEase);
-                    sphereMatRef.current.distortion = baseDistortion + pulse * 0.4 + impactDistortion;
+                    sphereMatRef.current.distortion = baseDistortion + pulse * 0.3 + impactDistortion * 0.8;
 
-                    sphereMatRef.current.thickness = 1.2 + Math.cos(time * 0.7) * 0.5;
+                    sphereMatRef.current.thickness = 1.5 + Math.cos(time * 0.7) * 0.3;
                 }
 
                 // --- Text Behavior (Sucked into the background sphere) ---
@@ -278,9 +278,9 @@ const HeroComposition = () => {
 
                     // 5. Text Material (Liquify and dissolve)
                     if (textMatRef.current) {
-                        textMatRef.current.distortion = THREE.MathUtils.lerp(0.4, 4.5, moveEase);
-                        textMatRef.current.thickness = THREE.MathUtils.lerp(1.5, 0.0, moveEase);
-                        textMatRef.current.chromaticAberration = THREE.MathUtils.lerp(1.0, 6.0, moveEase);
+                        textMatRef.current.distortion = THREE.MathUtils.lerp(0.2, 4.5, moveEase);
+                        textMatRef.current.thickness = THREE.MathUtils.lerp(2.0, 0.0, moveEase);
+                        textMatRef.current.chromaticAberration = THREE.MathUtils.lerp(0.3, 6.0, moveEase);
                         textMatRef.current.opacity = THREE.MathUtils.lerp(1.0, 0.0, moveEase);
                     }
                 }
@@ -306,7 +306,7 @@ const HeroComposition = () => {
                     ref={sphereRef}
                     position={[0, sphereStartY, isMobile ? 0 : -3.0]}
                 >
-                    <sphereGeometry args={[1, 16, 16]} />
+                    <sphereGeometry args={[1, 24, 24]} />
                     <MeshTransmissionMaterial
                         ref={sphereMatRef}
                         {...crystalMaterialProps}
@@ -319,8 +319,8 @@ const HeroComposition = () => {
                     position={[0, textY, isMobile ? 0 : 0.5]}
                 >
                     {/* Dynamic Lighting for both Mobile and Desktop to ensure consistent design */}
-                    <pointLight position={[-2, 1, 2]} intensity={isMobile ? 8 : 10} color="#ffaaee" distance={5} />
-                    <pointLight position={[2, -1, 1]} intensity={isMobile ? 8 : 10} color="#aaddff" distance={5} />
+                    <pointLight position={[-2, 1, 2]} intensity={isMobile ? 4 : 5} color="#ffaaee" distance={5} />
+                    <pointLight position={[2, -1, 1]} intensity={isMobile ? 4 : 5} color="#aaddff" distance={5} />
                     
                     <Center>
                         <Text3D
@@ -339,12 +339,20 @@ const HeroComposition = () => {
                             <MeshTransmissionMaterial
                                 ref={textMatRef}
                                 backside
-                                {...crystalMaterialProps}
-                                samples={isMobile ? 3 : 6}
+                                samples={isMobile ? 3 : 5}
                                 resolution={isMobile ? 256 : 512}
-                                thickness={1.5}
-                                roughness={0.0}
-                                anisotropy={0.5}
+                                thickness={2.0}
+                                roughness={0.3}
+                                chromaticAberration={0.3}
+                                anisotropy={0.2}
+                                distortion={0.2}
+                                distortionScale={0.3}
+                                temporalDistortion={0.1}
+                                iridescence={0.4}
+                                iridescenceIOR={1.1}
+                                iridescenceThicknessRange={[0, 800] as [number, number]}
+                                color="#b8c5db"
+                                toneMapped={false}
                             />
                         </Text3D>
                     </Center>
