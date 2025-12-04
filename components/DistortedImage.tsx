@@ -66,10 +66,10 @@ interface DistortedImageProps {
     scale?: [number, number, number];
 }
 
-export const DistortedImage: React.FC<DistortedImageProps> = React.memo(({ position, imgSrc, scale = [3, 4, 1] }) => {
+export const DistortedImage: React.FC<DistortedImageProps> = ({ position, imgSrc, scale = [3, 4, 1] }) => {
     const ref = useRef({ hovered: false });
     const materialRef = useRef<any>(null);
-
+    
     // Load texture
     const texture = useTexture(imgSrc);
     // @ts-ignore
@@ -78,6 +78,7 @@ export const DistortedImage: React.FC<DistortedImageProps> = React.memo(({ posit
     useFrame((state, delta) => {
         if (materialRef.current) {
             materialRef.current.uTime += delta;
+            // Smooth lerp for hover effect
             materialRef.current.uHover = THREE.MathUtils.lerp(
                 materialRef.current.uHover,
                 ref.current.hovered ? 1 : 0,
@@ -88,15 +89,15 @@ export const DistortedImage: React.FC<DistortedImageProps> = React.memo(({ posit
 
     return (
         <group position={position}>
-            <mesh
+            <mesh 
                 scale={scale as any}
                 onPointerOver={() => (ref.current.hovered = true)}
                 onPointerOut={() => (ref.current.hovered = false)}
             >
-                <planeGeometry args={[1, 1, 16, 16]} />
+                <planeGeometry args={[1, 1, 32, 32]} />
                 {/* @ts-ignore */}
                 <imageDistortMaterial ref={materialRef} uTexture={texture} transparent />
             </mesh>
         </group>
     );
-});
+};

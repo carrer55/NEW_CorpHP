@@ -107,8 +107,8 @@ const HeroComposition = () => {
     const fontUrl = 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/fonts/helvetiker_bold.typeface.json';
 
     // Colors
-    const initialColor = useMemo(() => new THREE.Color('#ffffff'), []);
-    const targetColor = useMemo(() => new THREE.Color('#d0d7ff'), []);
+    const initialColor = useMemo(() => new THREE.Color('#eef2ff'), []); 
+    const targetColor = useMemo(() => new THREE.Color('#ffffff'), []);
 
     // --- Responsive Configuration ---
 
@@ -128,26 +128,26 @@ const HeroComposition = () => {
     
     // Unified Crystal Material Settings (Performance Optimized)
     const crystalMaterialProps = {
-        samples: isMobile ? 2 : 3,
-        resolution: isMobile ? 256 : 384,
-        thickness: 0.5,
-        chromaticAberration: 0.0,
-        anisotropy: 0.1,
-        distortion: 0.1,
-        distortionScale: 0.2,
-        temporalDistortion: 0.05,
-        iridescence: 0.0,
-        iridescenceIOR: 1.0,
-        iridescenceThicknessRange: [0, 500] as [number, number],
-        roughness: 0.0,
-        transmission: 1.0,
-        color: "#ffffff",
+        samples: isMobile ? 4 : 8, // Increased mobile samples slightly for better quality
+        resolution: isMobile ? 512 : 1024, // Increased mobile resolution
+        thickness: 1.5, // Unified thickness (was 1.0 on mobile)
+        chromaticAberration: 1.0, 
+        anisotropy: 0.3, 
+        distortion: 0.4, 
+        distortionScale: 0.5,
+        temporalDistortion: 0.2, 
+        iridescence: 1,
+        iridescenceIOR: 1.2,
+        iridescenceThicknessRange: [0, 1400] as [number, number],
+        roughness: 0.0, // Unified roughness (glassy)
+        color: "#eef2ff",
         background: new THREE.Color('#000000'),
         toneMapped: false,
     };
     
     useFrame((state) => {
-        const scaledRangeLimit = 0.25 * (6 / TOTAL_PAGES);
+        // Adjust animation ranges for increased scroll distance
+        const scaledRangeLimit = 0.25 * (6 / TOTAL_PAGES); 
         const range = scroll.range(0, scaledRangeLimit);
         const ease = THREE.MathUtils.smoothstep(range, 0, 1);
         const aggressiveEase = Math.pow(ease, 3);
@@ -237,17 +237,14 @@ const HeroComposition = () => {
                     sphereMatRef.current.color.lerpColors(initialColor, targetColor, absorbEase);
 
                     const pulse = (Math.sin(time * 1.1) + 1) * 0.5;
-                    const impactDistortion = Math.sin(absorbEase * Math.PI) * 1.2;
+                    const impactDistortion = Math.sin(absorbEase * Math.PI) * 2.0;
 
-                    sphereMatRef.current.chromaticAberration = THREE.MathUtils.lerp(0.0, 0.8, absorbEase) + pulse * 0.3 + impactDistortion * 1.0;
+                    sphereMatRef.current.chromaticAberration = 1.2 + pulse * 1.5 + impactDistortion * 3.0;
 
-                    const baseDistortion = THREE.MathUtils.lerp(0.1, 0.7, absorbEase);
-                    sphereMatRef.current.distortion = baseDistortion + pulse * 0.2 + impactDistortion * 0.5;
+                    const baseDistortion = THREE.MathUtils.lerp(crystalMaterialProps.distortion, 0.8, absorbEase);
+                    sphereMatRef.current.distortion = baseDistortion + pulse * 0.4 + impactDistortion;
 
-                    sphereMatRef.current.thickness = THREE.MathUtils.lerp(0.5, 1.5, absorbEase) + Math.cos(time * 0.7) * 0.2;
-
-                    sphereMatRef.current.iridescence = THREE.MathUtils.lerp(0.0, 0.8, absorbEase);
-                    sphereMatRef.current.roughness = THREE.MathUtils.lerp(0.0, 0.15, absorbEase);
+                    sphereMatRef.current.thickness = 1.2 + Math.cos(time * 0.7) * 0.5;
                 }
 
                 // --- Text Behavior (Sucked into the background sphere) ---
@@ -280,11 +277,12 @@ const HeroComposition = () => {
                     textGroupRef.current.rotation.x = THREE.MathUtils.lerp(0, Math.PI / 6, moveEase);
                     textGroupRef.current.rotation.z = THREE.MathUtils.lerp(0, -Math.PI / 4, moveEase);
 
-                    // 5. Text Material (Fade and dissolve)
+                    // 5. Text Material (Liquify and dissolve)
                     if (textMatRef.current) {
-                        textMatRef.current.transmission = THREE.MathUtils.lerp(0.1, 1.0, moveEase);
+                        textMatRef.current.distortion = THREE.MathUtils.lerp(0.4, 4.5, moveEase);
+                        textMatRef.current.thickness = THREE.MathUtils.lerp(1.5, 0.0, moveEase);
+                        textMatRef.current.chromaticAberration = THREE.MathUtils.lerp(1.0, 6.0, moveEase);
                         textMatRef.current.opacity = THREE.MathUtils.lerp(1.0, 0.0, moveEase);
-                        textMatRef.current.metalness = THREE.MathUtils.lerp(0.9, 0.2, moveEase);
                     }
                 }
             }
@@ -309,7 +307,7 @@ const HeroComposition = () => {
                     ref={sphereRef}
                     position={[0, sphereStartY, isMobile ? 0 : -3.0]}
                 >
-                    <sphereGeometry args={[1, 24, 24]} />
+                    <sphereGeometry args={[1, 32, 32]} />
                     <MeshTransmissionMaterial
                         ref={sphereMatRef}
                         {...crystalMaterialProps}
@@ -322,37 +320,32 @@ const HeroComposition = () => {
                     position={[0, textY, isMobile ? 0 : 0.5]}
                 >
                     {/* Dynamic Lighting for both Mobile and Desktop to ensure consistent design */}
-                    <spotLight position={[-3, 2, 3]} intensity={isMobile ? 15 : 20} angle={0.5} penumbra={0.8} color="#ffffff" distance={8} />
-                    <spotLight position={[3, -1, 2]} intensity={isMobile ? 12 : 16} angle={0.6} penumbra={0.7} color="#e8f0ff" distance={7} />
-                    <pointLight position={[0, -2, -2]} intensity={isMobile ? 3 : 4} color="#4488ff" distance={6} />
+                    <pointLight position={[-2, 1, 2]} intensity={isMobile ? 8 : 10} color="#ffaaee" distance={5} />
+                    <pointLight position={[2, -1, 1]} intensity={isMobile ? 8 : 10} color="#aaddff" distance={5} />
                     
                     <Center>
-                        <Text3D
-                            font={fontUrl}
-                            size={textSize}
-                            height={isMobile ? 0.3 : 0.4}
-                            curveSegments={isMobile ? 12 : 16}
+                        <Text3D 
+                            font={fontUrl} 
+                            size={textSize} 
+                            height={isMobile ? 0.3 : 0.4} // Thicker on mobile to match desktop design
+                            curveSegments={isMobile ? 16 : 24} // Smoother
                             bevelEnabled
-                            bevelThickness={isMobile ? 0.03 : 0.05}
+                            bevelThickness={isMobile ? 0.03 : 0.05} 
                             bevelSize={isMobile ? 0.01 : 0.02}
                             bevelOffset={0}
-                            bevelSegments={isMobile ? 3 : 4}
+                            bevelSegments={isMobile ? 4 : 5}
                             letterSpacing={-0.03}
                         >
                             FOUND
-                            <meshPhysicalMaterial
+                            <MeshTransmissionMaterial
                                 ref={textMatRef}
-                                color="#e8f0ff"
-                                metalness={0.9}
-                                roughness={0.08}
-                                clearcoat={1.0}
-                                clearcoatRoughness={0.05}
-                                reflectivity={1.0}
-                                ior={2.4}
-                                thickness={0.5}
-                                transmission={0.1}
-                                envMapIntensity={1.2}
-                                toneMapped={false}
+                                backside
+                                {...crystalMaterialProps}
+                                samples={isMobile ? 4 : 10} 
+                                resolution={isMobile ? 512 : 1024}
+                                thickness={1.5}
+                                roughness={0.0}
+                                anisotropy={0.5}
                             />
                         </Text3D>
                     </Center>
@@ -441,7 +434,7 @@ const DesktopProductPanel = () => {
 };
 
 // Exporting to be reusable in MobileSwipeScroll
-export const PrismaticArtifact = React.memo(() => {
+export const PrismaticArtifact = () => {
     const groupRef = useRef<THREE.Group>(null);
     const { height, width } = useThree((state) => state.viewport);
     const isMobile = width < 6.0;
@@ -454,13 +447,15 @@ export const PrismaticArtifact = React.memo(() => {
     });
 
     return (
+        // Raised Y position significantly to align with start of section text
+        // Was +2.2, now +3.5 to move it up.
+        // For mobile reuse, we might need to adjust position via props, but sticking to logic:
         <group position={[isMobile ? 0 : -2.5, isMobile ? 0 : POS_PHILOSOPHY * height + 3.5, 0]} ref={groupRef}>
             <mesh scale={isMobile ? 1.5 : 2.2}>
                 <icosahedronGeometry args={[1, 0]} />
                 <MeshTransmissionMaterial
                     backside
-                    samples={2}
-                    resolution={256}
+                    samples={3}
                     thickness={0.5}
                     chromaticAberration={1}
                     anisotropy={0.2}
@@ -472,22 +467,22 @@ export const PrismaticArtifact = React.memo(() => {
             </mesh>
         </group>
     );
-});
+};
 
-export const KineticGrid = React.memo(() => {
+export const KineticGrid = () => {
     const meshRef = useRef<THREE.InstancedMesh>(null);
     const { height, width } = useThree((state) => state.viewport);
     const scroll = useScroll();
     const isMobile = width < 6.0;
 
-    const count = isMobile ? 6 : 12;
+    const count = isMobile ? 8 : 16; 
     const total = count * count;
     const dummy = useMemo(() => new THREE.Object3D(), []);
     const color = useMemo(() => new THREE.Color(), []);
 
     useFrame((state) => {
         if (!meshRef.current) return;
-
+        
         const time = state.clock.elapsedTime;
         
         // --- UPDATED VISIBILITY LOGIC ---
@@ -546,14 +541,14 @@ export const KineticGrid = React.memo(() => {
             </instancedMesh>
         </group>
     );
-});
+};
 
 // Exporting to be reusable
-export const Singularity = React.memo(({ colorStart = '#ff3300', colorEnd = '#000000', scale = 1.0 }: { colorStart?: string, colorEnd?: string, scale?: number }) => {
+export const Singularity = ({ colorStart = '#ff3300', colorEnd = '#000000', scale = 1.0 }: { colorStart?: string, colorEnd?: string, scale?: number }) => {
     const blackHoleRef = useRef<THREE.Mesh>(null);
     const { height, width } = useThree((state) => state.viewport);
     const isMobile = width < 6.0;
-    const particleCount = isMobile ? 1000 : 2000; 
+    const particleCount = isMobile ? 1500 : 3500; 
     
     // Allow color override via props or default
     const cStart = useMemo(() => new THREE.Color(colorStart), [colorStart]);
@@ -606,13 +601,13 @@ export const Singularity = React.memo(({ colorStart = '#ff3300', colorEnd = '#00
                 <pointsMaterial size={0.03} vertexColors transparent opacity={0.8} blending={THREE.AdditiveBlending} depthWrite={false} />
             </points>
             <mesh ref={blackHoleRef}>
-                <sphereGeometry args={[1.8, 16, 16]} />
+                <sphereGeometry args={[1.8, 32, 32]} /> 
                 {/* @ts-ignore */}
                 <blackHoleMaterial transparent />
             </mesh>
         </group>
     );
-});
+};
 
 const CameraRig = () => {
     const scroll = useScroll();
@@ -622,7 +617,8 @@ const CameraRig = () => {
     useFrame((state) => {
         const offset = scroll.offset;
         const targetY = -offset * (scroll.pages - 1) * height;
-
+        
+        // Faster lerp on mobile for swipe responsiveness
         const lerpSpeed = isMobile ? 0.2 : 0.08;
         state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, lerpSpeed);
 
@@ -672,7 +668,7 @@ export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => vo
 
             {/* Full-screen Starfield Background */}
             <Sparkles
-                count={isMobile ? 100 : 200}
+                count={isMobile ? 150 : 300}
                 scale={[width * 2, height * TOTAL_PAGES * 1.2, 20]}
                 size={isMobile ? 3 : 4}
                 speed={0.4}
@@ -716,6 +712,7 @@ export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => vo
 
 export const AmbientScene = () => {
     useFrame((state) => {
+        // Gentle camera drift
         state.camera.position.x = Math.sin(state.clock.elapsedTime * 0.1) * 0.5;
         state.camera.position.y = Math.cos(state.clock.elapsedTime * 0.1) * 0.5;
         state.camera.lookAt(0, 0, 0);
@@ -734,15 +731,15 @@ export const AmbientScene = () => {
     );
 };
 
-export const SceneWrapper = React.memo(({ mode, onNavigate }: { mode: 'HOME' | 'AMBIENT', onNavigate?: (view: ViewState) => void }) => {
+export const SceneWrapper = ({ mode, onNavigate }: { mode: 'HOME' | 'AMBIENT', onNavigate?: (view: ViewState) => void }) => {
     return (
         <>
             <color attach="background" args={['#050505']} />
-            <Environment preset="apartment" />
+            <Environment preset="city" />
             <ambientLight intensity={0.5} />
             <spotLight position={[10, 10, 10]} intensity={1} />
-
+            
             {mode === 'HOME' ? <HomeScene onNavigate={onNavigate} /> : <AmbientScene />}
         </>
     );
-});
+};
