@@ -113,9 +113,9 @@ const HeroComposition = () => {
     // --- Responsive Configuration ---
 
     // Size: Larger sphere on desktop for dramatic depth effect
-    // Mobile: 0.45 sphere with ~0.72 text (width * 0.18 when width ≈ 4) = ratio ~0.625
-    // Desktop: 0.80 for prominent presence in the background
-    const sphereStartScale = isMobile ? 0.45 : 0.80; 
+    // Mobile: 0.9 sphere with ~0.72 text (width * 0.18 when width ≈ 4) = ratio ~0.625
+    // Desktop: 1.6 for prominent presence in the background
+    const sphereStartScale = isMobile ? 0.9 : 1.6; 
     
     // Text Size: Adjusted to ensure it fits on screen without cutoff
     const textSize = isMobile ? width * 0.18 : 0.9;
