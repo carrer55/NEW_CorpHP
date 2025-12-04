@@ -15,46 +15,31 @@
         background-color: #050505;
         color: #ffffff;
         font-family: 'Inter', sans-serif;
-        overflow: hidden; /* Managed by R3F ScrollControls or inner containers */
+        overflow: hidden;
       }
-      /* Hide scrollbar for Chrome/Safari/Opera */
       ::-webkit-scrollbar {
         display: none;
       }
-      /* Hide scrollbar for IE, Edge and Firefox */
       html {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
+        -ms-overflow-style: none;
+        scrollbar-width: none;
       }
-      
+
       .font-display {
         font-family: 'Syne', sans-serif;
       }
-      
+
       .font-goudy {
         font-family: 'Goudy Old Style', 'Goudy', 'Sorts Mill Goudy', serif;
       }
-      
+
       canvas {
         touch-action: none;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "@react-three/fiber": "https://aistudiocdn.com/@react-three/fiber@^9.4.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "@react-three/drei": "https://aistudiocdn.com/@react-three/drei@^10.7.7",
-    "three": "https://aistudiocdn.com/three@^0.181.2",
-    "framer-motion": "https://aistudiocdn.com/framer-motion@^12.23.24",
-    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0"
-  }
-}
-</script>
 </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
