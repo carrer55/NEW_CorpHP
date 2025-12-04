@@ -379,13 +379,16 @@ const HeroComposition = () => {
     );
 };
 
-// Desktop Product Panel with cursor-following animation (based on mobile version)
+// Desktop Product Panel with heavy tilt effect (thick panel)
 const DesktopProductPanel = () => {
     const groupRef = useRef<THREE.Group>(null);
     const materialRef = useRef<THREE.MeshStandardMaterial>(null);
     const { height } = useThree((state) => state.viewport);
     const { mouse } = useThree((state) => state);
     const texture = useTexture("https://images.unsplash.com/photo-1550684848-fac1c5b4e853?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80");
+
+    // Target rotation values for smooth interpolation
+    const targetRotation = useRef({ x: 0, y: 0 });
 
     useFrame((state, delta) => {
         const time = state.clock.elapsedTime;
@@ -395,21 +398,22 @@ const DesktopProductPanel = () => {
             const hoverY = Math.sin(time * 0.3) * 0.1;
             const hoverZ = Math.cos(time * 0.25) * 0.08;
 
-            // Very gentle mouse parallax (cursor following)
-            const parallaxX = mouse.x * 0.3; // Slow horizontal movement
-            const parallaxY = mouse.y * 0.15; // Subtle vertical movement
-
-            // Apply combined position
-            groupRef.current.position.x = parallaxX;
-            groupRef.current.position.y = hoverY + parallaxY;
+            groupRef.current.position.y = hoverY;
             groupRef.current.position.z = -1.5 + hoverZ;
 
-            // Very slow, majestic rotation
-            groupRef.current.rotation.x = Math.cos(time * 0.2) * 0.05;
-            groupRef.current.rotation.y = Math.sin(time * 0.25) * 0.12;
+            // Heavy tilt effect based on mouse position
+            // Invert Y for natural feel (mouse up = tilt back)
+            targetRotation.current.x = -mouse.y * 0.4;
+            targetRotation.current.y = mouse.x * 0.4;
+
+            // Smooth, heavy interpolation (slow response = heavy feel)
+            const lerpFactor = 1.5 * delta; // Very slow lerp for weight
+            groupRef.current.rotation.x += (targetRotation.current.x - groupRef.current.rotation.x) * lerpFactor;
+            groupRef.current.rotation.y += (targetRotation.current.y - groupRef.current.rotation.y) * lerpFactor;
+
+            // Subtle ambient rotation
             groupRef.current.rotation.z = Math.sin(time * 0.15) * 0.02;
 
-            // Ensure full opacity
             materialRef.current.opacity = 1;
         }
     });
@@ -420,10 +424,11 @@ const DesktopProductPanel = () => {
             <pointLight position={[3, 2, 4]} intensity={1.5} color="#00ffff" distance={10} />
             <pointLight position={[-3, -2, -4]} intensity={1.5} color="#ff9900" distance={10} />
 
-            {/* The Holographic Image Panel */}
+            {/* The Thick Holographic Image Panel */}
             <group ref={groupRef} position={[0, 0, -1.5]} scale={1}>
-                <mesh>
-                    <boxGeometry args={[2.5, 3.2, 0.1]} />
+                {/* Front face */}
+                <mesh position={[0, 0, 0.2]}>
+                    <boxGeometry args={[2.5, 3.2, 0.4]} />
                     <meshStandardMaterial
                         ref={materialRef}
                         map={texture}
@@ -434,6 +439,17 @@ const DesktopProductPanel = () => {
                         color="#ffffff"
                         transparent
                         opacity={1}
+                    />
+                </mesh>
+
+                {/* Edge glow for depth perception */}
+                <mesh position={[0, 0, 0.2]}>
+                    <boxGeometry args={[2.52, 3.22, 0.42]} />
+                    <meshBasicMaterial
+                        color="#00ffff"
+                        transparent
+                        opacity={0.1}
+                        side={THREE.BackSide}
                     />
                 </mesh>
             </group>
