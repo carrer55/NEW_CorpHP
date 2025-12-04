@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
-export const CustomCursor = () => {
+export const CustomCursor = memo(() => {
     // Use motion values to track mouse position without triggering re-renders
     const cursorX = useMotionValue(-100);
     const cursorY = useMotionValue(-100);
@@ -19,30 +19,43 @@ export const CustomCursor = () => {
     const [isHovering, setIsHovering] = useState(false);
 
     useEffect(() => {
+        let rafId: number | null = null;
+        let pendingUpdate = false;
+        let lastX = 0;
+        let lastY = 0;
+
         const moveCursor = (e: MouseEvent) => {
-            cursorX.set(e.clientX);
-            cursorY.set(e.clientY);
+            lastX = e.clientX;
+            lastY = e.clientY;
+
+            if (!pendingUpdate) {
+                pendingUpdate = true;
+                rafId = requestAnimationFrame(() => {
+                    cursorX.set(lastX);
+                    cursorY.set(lastY);
+                    pendingUpdate = false;
+                });
+            }
         };
 
         const handleMouseOver = (e: MouseEvent) => {
             const target = e.target as HTMLElement;
-            if (target.tagName === 'A' || 
-                target.tagName === 'BUTTON' || 
+            const isInteractive = target.tagName === 'A' ||
+                target.tagName === 'BUTTON' ||
                 target.tagName === 'INPUT' ||
                 target.tagName === 'TEXTAREA' ||
-                target.closest('a') || 
-                target.closest('button') || 
-                target.getAttribute('data-hover')) {
-                setIsHovering(true);
-            } else {
-                setIsHovering(false);
-            }
+                target.closest('a') ||
+                target.closest('button') ||
+                target.getAttribute('data-hover');
+
+            setIsHovering(!!isInteractive);
         };
 
-        window.addEventListener('mousemove', moveCursor);
-        window.addEventListener('mouseover', handleMouseOver);
+        window.addEventListener('mousemove', moveCursor, { passive: true });
+        window.addEventListener('mouseover', handleMouseOver, { passive: true });
 
         return () => {
+            if (rafId) cancelAnimationFrame(rafId);
             window.removeEventListener('mousemove', moveCursor);
             window.removeEventListener('mouseover', handleMouseOver);
         };
@@ -82,4 +95,4 @@ export const CustomCursor = () => {
             />
         </>
     );
-};
+});

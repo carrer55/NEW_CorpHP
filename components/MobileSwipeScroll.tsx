@@ -136,12 +136,12 @@ const MobileHero: React.FC<MobileHeroProps> = ({ isExiting }) => {
                         font={fontUrl}
                         size={width * 0.16}
                         height={0.25}
-                        curveSegments={Math.round(16 * settings.geometryDetail)}
+                        curveSegments={Math.round(12 * settings.geometryDetail)}
                         bevelEnabled
                         bevelThickness={0.03}
                         bevelSize={0.01}
                         bevelOffset={0}
-                        bevelSegments={Math.round(4 * settings.geometryDetail)}
+                        bevelSegments={Math.round(3 * settings.geometryDetail)}
                         letterSpacing={-0.03}
                     >
                         FOUND
@@ -1121,8 +1121,8 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
             </div>
 
             {/* 3D Canvas */}
-            <div className="absolute inset-0 z-0">
-                <Canvas camera={{ position: [0, 0, 5], fov: 50 }} dpr={[1, 2]}>
+            <div className="absolute inset-0 z-0" style={{ willChange: 'transform', transform: 'translateZ(0)' }}>
+                <Canvas camera={{ position: [0, 0, 5], fov: 50 }} dpr={[1, 2]} gl={{ powerPreference: 'high-performance' }}>
                     <color attach="background" args={['#050505']} />
                     <Environment preset="city" />
                     <ambientLight intensity={0.5} />
