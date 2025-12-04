@@ -6,6 +6,7 @@ import { DistortedImage } from './DistortedImage';
 import { Overlay } from './Overlay';
 import { ViewState } from '../types';
 import { useAdaptiveQuality, useFrameThrottle } from '../utils/performance';
+import { ScrollStreakParticles } from './ScrollStreakParticles';
 
 // --- Global Spacing Configuration ---
 const SECTION_SPACING = 1.5; // 1.0 = adjacent, 1.5 = 50vh gap
@@ -690,12 +691,11 @@ export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => vo
             <ScrollSnapHandler />
             <CameraRig />
 
-            <Sparkles
-                count={Math.round((isMobile ? 150 : 300) * settings.particleCount)}
+            <ScrollStreakParticles
+                count={Math.round((isMobile ? 200 : 500) * settings.particleCount)}
                 scale={[width * 2, height * TOTAL_PAGES * 1.2, 20]}
-                size={isMobile ? 3 : 4}
-                speed={0.4}
-                opacity={0.5}
+                size={isMobile ? 50 : 80}
+                opacity={0.6}
                 color="#ffffff"
                 position={[0, -height * (TOTAL_PAGES / 2) + height, -5]}
             />
