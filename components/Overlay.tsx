@@ -143,7 +143,7 @@ export const Overlay: React.FC<OverlayProps> = ({ onNavigate }) => {
                      >
                         <div className="text-xs font-mono text-red-500 mb-6 tracking-widest uppercase">A Small Yet Profound Beginning</div>
                         <h2 className="text-5xl sm:text-6xl md:text-8xl font-display font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-b from-white to-transparent opacity-80 leading-none tracking-tighter">
-                            「 . The DOT 」
+                            ［.The DOT］
                         </h2>
                         <div className="text-lg md:text-2xl font-bold text-white mb-8 tracking-widest opacity-90 flex items-center justify-center gap-4">
                              {/* Replaced dashed line with solid line as requested */}
