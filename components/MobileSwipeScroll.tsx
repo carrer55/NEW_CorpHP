@@ -8,6 +8,7 @@ import { Text3D, Center, MeshTransmissionMaterial, Float, Environment, Sparkles,
 import * as THREE from 'three';
 import { ViewState } from '../types';
 import { PrivacyPolicyPage } from './ContentPages';
+import { useAdaptiveQuality } from '../utils/performance';
 
 // --- Mobile Scene Components ---
 
@@ -17,6 +18,8 @@ interface MobileHeroProps {
 
 const MobileHero: React.FC<MobileHeroProps> = ({ isExiting }) => {
     const { width } = useThree((state) => state.viewport);
+    const { settings } = useAdaptiveQuality();
+    const frameThrottle = useRef(0);
     const fontUrl = 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/fonts/helvetiker_bold.typeface.json';
     const groupRef = useRef<THREE.Group>(null);
     const sphereRef = useRef<THREE.Mesh>(null);
@@ -24,15 +27,13 @@ const MobileHero: React.FC<MobileHeroProps> = ({ isExiting }) => {
     const textMatRef = useRef<any>(null);
     const warpGroupRef = useRef<THREE.Group>(null);
 
-    // Initial Positions
-    const sphereBaseY = 0.5; 
-    const sphereBaseZ = -1.2; 
+    const sphereBaseY = 0.5;
+    const sphereBaseZ = -1.2;
     const textBaseY = -0.1;
 
-    // Crystal Material Props
-    const crystalMaterialProps = {
-        samples: 4,
-        resolution: 512,
+    const crystalMaterialProps = useMemo(() => ({
+        samples: Math.round(4 * settings.geometryDetail),
+        resolution: settings.transmissionResolution,
         thickness: 1.5,
         chromaticAberration: 1.0,
         anisotropy: 0.3,
@@ -46,11 +47,17 @@ const MobileHero: React.FC<MobileHeroProps> = ({ isExiting }) => {
         color: "#eef2ff",
         background: new THREE.Color('#000000'),
         toneMapped: false,
-    };
+    }), [settings]);
 
     useFrame((state, delta) => {
+        if (!isExiting) {
+            frameThrottle.current++;
+            if (frameThrottle.current < settings.updateThrottle) return;
+            frameThrottle.current = 0;
+        }
+
         const time = state.clock.elapsedTime;
-        
+
         if (sphereRef.current && groupRef.current) {
             
             if (isExiting) {
@@ -129,12 +136,12 @@ const MobileHero: React.FC<MobileHeroProps> = ({ isExiting }) => {
                         font={fontUrl}
                         size={width * 0.16}
                         height={0.25}
-                        curveSegments={16}
+                        curveSegments={Math.round(16 * settings.geometryDetail)}
                         bevelEnabled
                         bevelThickness={0.03}
                         bevelSize={0.01}
                         bevelOffset={0}
-                        bevelSegments={4}
+                        bevelSegments={Math.round(4 * settings.geometryDetail)}
                         letterSpacing={-0.03}
                     >
                         FOUND
@@ -150,17 +157,16 @@ const MobileHero: React.FC<MobileHeroProps> = ({ isExiting }) => {
                 </Center>
             </group>
             
-            {/* Background Stars */}
             <group ref={warpGroupRef}>
-                <Sparkles count={60} scale={8} size={4} speed={0.4} opacity={0.5} color="#ffffff" />
+                <Sparkles count={Math.round(60 * settings.particleCount)} scale={8} size={4} speed={0.4} opacity={0.5} color="#ffffff" />
                 <Float speed={0.5} rotationIntensity={0.4} floatIntensity={0.4}>
-                    <Sparkles 
-                        count={2} 
-                        scale={10} 
-                        size={12} 
-                        speed={0.1} 
-                        opacity={0.8} 
-                        color="#ffffff" 
+                    <Sparkles
+                        count={Math.max(1, Math.round(2 * settings.particleCount))}
+                        scale={10}
+                        size={12}
+                        speed={0.1}
+                        opacity={0.8}
+                        color="#ffffff"
                     />
                 </Float>
             </group>
@@ -175,9 +181,17 @@ interface Product3DCompositionProps {
 const Product3DComposition: React.FC<Product3DCompositionProps> = ({ isExiting }) => {
     const groupRef = useRef<THREE.Group>(null);
     const materialRef = useRef<THREE.MeshStandardMaterial>(null);
+    const { settings } = useAdaptiveQuality();
+    const frameThrottle = useRef(0);
     const texture = useTexture("https://images.unsplash.com/photo-1550684848-fac1c5b4e853?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80");
 
     useFrame((state, delta) => {
+        if (!isExiting) {
+            frameThrottle.current++;
+            if (frameThrottle.current < settings.updateThrottle) return;
+            frameThrottle.current = 0;
+        }
+
         const time = state.clock.elapsedTime;
         // Speed tuned for 1000ms transition
         const lerpSpeed = delta * 2.0; 
@@ -225,10 +239,9 @@ const Product3DComposition: React.FC<Product3DCompositionProps> = ({ isExiting }
 
     return (
         <group>
-             {/* Background Stars - Slower for premium feel */}
-             <Sparkles count={60} scale={8} size={4} speed={0.2} opacity={0.5} color="#ffffff" />
+             <Sparkles count={Math.round(60 * settings.particleCount)} scale={8} size={4} speed={0.2} opacity={0.5} color="#ffffff" />
              <Float speed={0.3} rotationIntensity={0.2} floatIntensity={0.2}>
-                <Sparkles count={2} scale={10} size={12} speed={0.05} opacity={0.8} color="#ffffff" />
+                <Sparkles count={Math.max(1, Math.round(2 * settings.particleCount))} scale={10} size={12} speed={0.05} opacity={0.8} color="#ffffff" />
              </Float>
 
              {/* Dynamic Lights for the panel - Gentle movement */}
@@ -263,8 +276,16 @@ interface MobilePhilosophyDiamondProps {
 const MobilePhilosophyDiamond: React.FC<MobilePhilosophyDiamondProps> = ({ isExiting }) => {
     const meshRef = useRef<THREE.Mesh>(null);
     const materialRef = useRef<any>(null);
+    const { settings } = useAdaptiveQuality();
+    const frameThrottle = useRef(0);
 
     useFrame((state, delta) => {
+        if (!isExiting) {
+            frameThrottle.current++;
+            if (frameThrottle.current < settings.updateThrottle) return;
+            frameThrottle.current = 0;
+        }
+
         const time = state.clock.elapsedTime;
         const lerpSpeed = delta * 3.0;
 
@@ -322,28 +343,27 @@ const MobilePhilosophyDiamond: React.FC<MobilePhilosophyDiamondProps> = ({ isExi
 
     return (
         <group>
-             {/* Background Stars */}
-             <Sparkles count={40} scale={6} size={3} speed={0.3} opacity={0.5} color="#e0e0ff" />
-             
-             {/* Philosophy themed lighting (Cyan/Purple) */}
+             <Sparkles count={Math.round(40 * settings.particleCount)} scale={6} size={3} speed={0.3} opacity={0.5} color="#e0e0ff" />
+
              <pointLight position={[-3, 2, 2]} intensity={5} color="#00ffff" distance={10} />
              <pointLight position={[3, -2, -2]} intensity={5} color="#ff00ff" distance={10} />
              <pointLight position={[0, 0, 5]} intensity={2} color="#ffffff" distance={10} />
 
-             <mesh 
-                ref={meshRef} 
-                position={[0, 0, 5]} // Start at foreground
-                scale={[0, 0, 0]} 
+             <mesh
+                ref={meshRef}
+                position={[0, 0, 5]}
+                scale={[0, 0, 0]}
                 rotation={[0.5, 3, 0]}
              >
                 <icosahedronGeometry args={[1, 0]} />
-                <MeshTransmissionMaterial 
+                <MeshTransmissionMaterial
                     ref={materialRef}
-                    samples={4} 
-                    thickness={4.0} 
-                    chromaticAberration={3.0} 
-                    anisotropy={0.3} 
-                    distortion={2.0} 
+                    samples={Math.round(4 * settings.geometryDetail)}
+                    resolution={settings.transmissionResolution}
+                    thickness={4.0}
+                    chromaticAberration={3.0}
+                    anisotropy={0.3}
+                    distortion={2.0}
                     distortionScale={0.5}
                     temporalDistortion={0.1}
                     iridescence={1}
@@ -364,7 +384,9 @@ interface MobileKineticGridProps {
 const MobileKineticGrid: React.FC<MobileKineticGridProps> = ({ isExiting }) => {
     const meshRef = useRef<THREE.InstancedMesh>(null);
     const groupRef = useRef<THREE.Group>(null);
-    const count = 10;
+    const { settings } = useAdaptiveQuality();
+    const frameThrottle = useRef(0);
+    const count = Math.round(10 * settings.geometryDetail);
     const total = count * count;
     const dummy = useMemo(() => new THREE.Object3D(), []);
     const color = useMemo(() => new THREE.Color(), []);
@@ -374,9 +396,14 @@ const MobileKineticGrid: React.FC<MobileKineticGridProps> = ({ isExiting }) => {
     const exitProgress = useRef(0);
 
     useFrame((state, delta) => {
+        if (!isExiting) {
+            frameThrottle.current++;
+            if (frameThrottle.current < settings.updateThrottle) return;
+            frameThrottle.current = 0;
+        }
+
         const time = state.clock.elapsedTime;
-        
-        // 1. Manage Transition Progress
+
         entryProgress.current = THREE.MathUtils.lerp(entryProgress.current, 1, delta * 1.5);
         
         // Exit: Speed up slightly for 1000ms transition
@@ -510,7 +537,9 @@ interface MobileFloatingDotsProps {
 
 const MobileFloatingDots: React.FC<MobileFloatingDotsProps> = ({ isExiting }) => {
     const meshRef = useRef<THREE.InstancedMesh>(null);
-    const count = 400; 
+    const { settings } = useAdaptiveQuality();
+    const frameThrottle = useRef(0);
+    const count = Math.round(400 * settings.particleCount); 
     const dummy = useMemo(() => new THREE.Object3D(), []);
     
     const { radii, angles, speeds, yOffsets } = useMemo(() => {
@@ -533,6 +562,13 @@ const MobileFloatingDots: React.FC<MobileFloatingDotsProps> = ({ isExiting }) =>
 
     useFrame((state, delta) => {
         if (!meshRef.current) return;
+
+        if (!isExiting) {
+            frameThrottle.current++;
+            if (frameThrottle.current < settings.updateThrottle) return;
+            frameThrottle.current = 0;
+        }
+
         const time = state.clock.elapsedTime;
 
         entryProgress.current = THREE.MathUtils.lerp(entryProgress.current, 1, delta * 1.5);
@@ -598,12 +634,20 @@ interface MobileSingularityProps {
 
 const MobileSingularity: React.FC<MobileSingularityProps> = ({ isExiting }) => {
     const blackHoleRef = useRef<THREE.Mesh>(null);
+    const { settings } = useAdaptiveQuality();
+    const frameThrottle = useRef(0);
     const entryProgress = useRef(0);
     const exitProgress = useRef(0);
 
     useFrame((state, delta) => {
+        if (!isExiting) {
+            frameThrottle.current++;
+            if (frameThrottle.current < settings.updateThrottle) return;
+            frameThrottle.current = 0;
+        }
+
         const time = state.clock.elapsedTime;
-        
+
         entryProgress.current = THREE.MathUtils.lerp(entryProgress.current, 1, delta * 1.5);
         
         if (isExiting) {
@@ -639,15 +683,15 @@ const MobileSingularity: React.FC<MobileSingularityProps> = ({ isExiting }) => {
 
     return (
         <group position={[0, -0.5, 0]}>
-             <Sparkles count={60} scale={8} size={4} speed={0.4} opacity={0.5} color="#ffffff" />
+             <Sparkles count={Math.round(60 * settings.particleCount)} scale={8} size={4} speed={0.4} opacity={0.5} color="#ffffff" />
             <Float speed={0.5} rotationIntensity={0.4} floatIntensity={0.4}>
-                <Sparkles 
-                    count={2} 
-                    scale={10} 
-                    size={12} 
-                    speed={0.1} 
-                    opacity={0.8} 
-                    color="#ffffff" 
+                <Sparkles
+                    count={Math.max(1, Math.round(2 * settings.particleCount))}
+                    scale={10}
+                    size={12}
+                    speed={0.1}
+                    opacity={0.8}
+                    color="#ffffff"
                 />
             </Float>
 
@@ -806,6 +850,19 @@ const Section5 = ({ isExiting }: { isExiting: boolean }) => (
         </div>
     </motion.div>
 );
+
+const ExpandSparkles = () => {
+    const { settings } = useAdaptiveQuality();
+
+    return (
+        <group>
+            <Sparkles count={Math.round(60 * settings.particleCount)} scale={8} size={4} speed={0.4} opacity={0.5} color="#ffffff" />
+            <Float speed={0.5} rotationIntensity={0.4} floatIntensity={0.4}>
+                <Sparkles count={Math.max(1, Math.round(2 * settings.particleCount))} scale={10} size={12} speed={0.1} opacity={0.8} color="#ffffff" />
+            </Float>
+        </group>
+    );
+};
 
 const Section6 = ({ onNavigate, onOpenPrivacy }: { onNavigate?: (view: ViewState) => void, onOpenPrivacy: () => void }) => (
     <div className="h-full flex flex-col items-center justify-center p-8 pointer-events-none relative">
@@ -1097,12 +1154,7 @@ export const MobileSwipeScroll: React.FC<MobileSwipeScrollProps> = ({ onNavigate
                             </group>
                         )}
                         {currentSection === 5 && (
-                            <group key="expand">
-                                <Sparkles count={60} scale={8} size={4} speed={0.4} opacity={0.5} color="#ffffff" />
-                                <Float speed={0.5} rotationIntensity={0.4} floatIntensity={0.4}>
-                                    <Sparkles count={2} scale={10} size={12} speed={0.1} opacity={0.8} color="#ffffff" />
-                                </Float>
-                            </group>
+                            <ExpandSparkles key="expand" />
                         )}
                     </Suspense>
                 </Canvas>

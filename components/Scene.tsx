@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { DistortedImage } from './DistortedImage';
 import { Overlay } from './Overlay';
 import { ViewState } from '../types';
+import { useAdaptiveQuality, useFrameThrottle } from '../utils/performance';
 
 // --- Global Spacing Configuration ---
 const SECTION_SPACING = 1.5; // 1.0 = adjacent, 1.5 = 50vh gap
@@ -95,12 +96,13 @@ const HeroComposition = () => {
     const sphereRef = useRef<THREE.Mesh>(null);
     const textGroupRef = useRef<THREE.Group>(null);
     const sphereMatRef = useRef<any>(null);
-    const textMatRef = useRef<any>(null); // Ref for Text Material
+    const textMatRef = useRef<any>(null);
     const scroll = useScroll();
     const { width, height } = useThree((state) => state.viewport);
-    const { mouse } = useThree(); // Get mouse position for interaction
-    
-    // Increased threshold to better catch vertical mobile layouts/tablets
+    const { mouse } = useThree();
+    const { settings } = useAdaptiveQuality();
+    const frameThrottle = useRef(0);
+
     const isMobile = width < 6.0; 
     
     // Font URL for 3D Text
@@ -126,28 +128,30 @@ const HeroComposition = () => {
     const sphereStartY = 0.5;
     const textY = isMobile ? (sphereStartY - 0.65 - 0.4) : (sphereStartY - 0.7); 
     
-    // Unified Crystal Material Settings (Performance Optimized)
-    const crystalMaterialProps = {
-        samples: isMobile ? 4 : 8, // Increased mobile samples slightly for better quality
-        resolution: isMobile ? 512 : 1024, // Increased mobile resolution
-        thickness: 1.5, // Unified thickness (was 1.0 on mobile)
-        chromaticAberration: 1.0, 
-        anisotropy: 0.3, 
-        distortion: 0.4, 
+    const crystalMaterialProps = useMemo(() => ({
+        samples: Math.round((isMobile ? 4 : settings.transmissionSamples) * settings.geometryDetail),
+        resolution: isMobile ? 512 : settings.transmissionResolution,
+        thickness: 1.5,
+        chromaticAberration: 1.0,
+        anisotropy: 0.3,
+        distortion: 0.4,
         distortionScale: 0.5,
-        temporalDistortion: 0.2, 
+        temporalDistortion: 0.2,
         iridescence: 1,
         iridescenceIOR: 1.2,
         iridescenceThicknessRange: [0, 1400] as [number, number],
-        roughness: 0.0, // Unified roughness (glassy)
+        roughness: 0.0,
         color: "#eef2ff",
         background: new THREE.Color('#000000'),
         toneMapped: false,
-    };
+    }), [isMobile, settings]);
     
     useFrame((state) => {
-        // Adjust animation ranges for increased scroll distance
-        const scaledRangeLimit = 0.25 * (6 / TOTAL_PAGES); 
+        frameThrottle.current++;
+        if (frameThrottle.current < settings.updateThrottle) return;
+        frameThrottle.current = 0;
+
+        const scaledRangeLimit = 0.25 * (6 / TOTAL_PAGES);
         const range = scroll.range(0, scaledRangeLimit);
         const ease = THREE.MathUtils.smoothstep(range, 0, 1);
         const aggressiveEase = Math.pow(ease, 3);
@@ -324,16 +328,16 @@ const HeroComposition = () => {
                     <pointLight position={[2, -1, 1]} intensity={isMobile ? 8 : 10} color="#aaddff" distance={5} />
                     
                     <Center>
-                        <Text3D 
-                            font={fontUrl} 
-                            size={textSize} 
-                            height={isMobile ? 0.3 : 0.4} // Thicker on mobile to match desktop design
-                            curveSegments={isMobile ? 16 : 24} // Smoother
+                        <Text3D
+                            font={fontUrl}
+                            size={textSize}
+                            height={isMobile ? 0.3 : 0.4}
+                            curveSegments={Math.round((isMobile ? 16 : 24) * settings.geometryDetail)}
                             bevelEnabled
-                            bevelThickness={isMobile ? 0.03 : 0.05} 
+                            bevelThickness={isMobile ? 0.03 : 0.05}
                             bevelSize={isMobile ? 0.01 : 0.02}
                             bevelOffset={0}
-                            bevelSegments={isMobile ? 4 : 5}
+                            bevelSegments={Math.round((isMobile ? 4 : 5) * settings.geometryDetail)}
                             letterSpacing={-0.03}
                         >
                             FOUND
@@ -437,9 +441,15 @@ const DesktopProductPanel = () => {
 export const PrismaticArtifact = () => {
     const groupRef = useRef<THREE.Group>(null);
     const { height, width } = useThree((state) => state.viewport);
+    const { settings } = useAdaptiveQuality();
+    const frameThrottle = useRef(0);
     const isMobile = width < 6.0;
 
     useFrame((state) => {
+        frameThrottle.current++;
+        if (frameThrottle.current < settings.updateThrottle) return;
+        frameThrottle.current = 0;
+
         if (groupRef.current) {
             groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
             groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.3) * 0.1;
@@ -455,7 +465,8 @@ export const PrismaticArtifact = () => {
                 <icosahedronGeometry args={[1, 0]} />
                 <MeshTransmissionMaterial
                     backside
-                    samples={3}
+                    samples={Math.max(2, Math.round(3 * settings.geometryDetail))}
+                    resolution={settings.transmissionResolution}
                     thickness={0.5}
                     chromaticAberration={1}
                     anisotropy={0.2}
@@ -473,16 +484,22 @@ export const KineticGrid = () => {
     const meshRef = useRef<THREE.InstancedMesh>(null);
     const { height, width } = useThree((state) => state.viewport);
     const scroll = useScroll();
+    const { settings } = useAdaptiveQuality();
+    const frameThrottle = useRef(0);
     const isMobile = width < 6.0;
 
-    const count = isMobile ? 8 : 16; 
+    const count = Math.round((isMobile ? 8 : 16) * settings.geometryDetail);
     const total = count * count;
     const dummy = useMemo(() => new THREE.Object3D(), []);
     const color = useMemo(() => new THREE.Color(), []);
 
     useFrame((state) => {
         if (!meshRef.current) return;
-        
+
+        frameThrottle.current++;
+        if (frameThrottle.current < settings.updateThrottle) return;
+        frameThrottle.current = 0;
+
         const time = state.clock.elapsedTime;
         
         // --- UPDATED VISIBILITY LOGIC ---
@@ -547,8 +564,10 @@ export const KineticGrid = () => {
 export const Singularity = ({ colorStart = '#ff3300', colorEnd = '#000000', scale = 1.0 }: { colorStart?: string, colorEnd?: string, scale?: number }) => {
     const blackHoleRef = useRef<THREE.Mesh>(null);
     const { height, width } = useThree((state) => state.viewport);
+    const { settings } = useAdaptiveQuality();
+    const frameThrottle = useRef(0);
     const isMobile = width < 6.0;
-    const particleCount = isMobile ? 1500 : 3500; 
+    const particleCount = Math.round((isMobile ? 1500 : 3500) * settings.particleCount); 
     
     // Allow color override via props or default
     const cStart = useMemo(() => new THREE.Color(colorStart), [colorStart]);
@@ -578,12 +597,16 @@ export const Singularity = ({ colorStart = '#ff3300', colorEnd = '#000000', scal
     }, [particleCount]);
 
     useFrame((state) => {
+        frameThrottle.current++;
+        if (frameThrottle.current < settings.updateThrottle) return;
+        frameThrottle.current = 0;
+
         if (blackHoleRef.current) {
             // @ts-ignore
             blackHoleRef.current.material.uniforms.uTime.value = state.clock.elapsedTime;
             // @ts-ignore
             blackHoleRef.current.material.uniforms.uColorStart.value = cStart;
-             // @ts-ignore
+            // @ts-ignore
             blackHoleRef.current.material.uniforms.uColorEnd.value = cEnd;
         }
     });
@@ -659,6 +682,7 @@ const ScrollSnapHandler = () => {
 
 export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => void }) => {
     const { height, width } = useThree((state) => state.viewport);
+    const { settings } = useAdaptiveQuality();
     const isMobile = width < 6.0;
 
     return (
@@ -666,9 +690,8 @@ export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => vo
             <ScrollSnapHandler />
             <CameraRig />
 
-            {/* Full-screen Starfield Background */}
             <Sparkles
-                count={isMobile ? 150 : 300}
+                count={Math.round((isMobile ? 150 : 300) * settings.particleCount)}
                 scale={[width * 2, height * TOTAL_PAGES * 1.2, 20]}
                 size={isMobile ? 3 : 4}
                 speed={0.4}
@@ -711,8 +734,14 @@ export const HomeScene = ({ onNavigate }: { onNavigate?: (view: ViewState) => vo
 };
 
 export const AmbientScene = () => {
+    const { settings } = useAdaptiveQuality();
+    const frameThrottle = useRef(0);
+
     useFrame((state) => {
-        // Gentle camera drift
+        frameThrottle.current++;
+        if (frameThrottle.current < settings.updateThrottle) return;
+        frameThrottle.current = 0;
+
         state.camera.position.x = Math.sin(state.clock.elapsedTime * 0.1) * 0.5;
         state.camera.position.y = Math.cos(state.clock.elapsedTime * 0.1) * 0.5;
         state.camera.lookAt(0, 0, 0);
@@ -720,7 +749,7 @@ export const AmbientScene = () => {
 
     return (
         <group>
-             <Sparkles count={200} scale={15} size={2} speed={0.2} opacity={0.3} color="#44aaff" />
+             <Sparkles count={Math.round(200 * settings.particleCount)} scale={15} size={2} speed={0.2} opacity={0.3} color="#44aaff" />
              <Float speed={1} rotationIntensity={0.2} floatIntensity={0.2}>
                 <points>
                     <sphereGeometry args={[4, 32, 32]} />
