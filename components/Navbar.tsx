@@ -41,7 +41,7 @@ export const Navbar: React.FC<NavbarProps> = memo(({ currentView, onNavigate }) 
                         .Found Inc.
                     </div>
                     <div className="text-[10px] font-mono text-gray-400 tracking-widest">
-                        SYSTEM V.2.0
+                        PERCEPTION ENGINE
                     </div>
                 </div>
 
