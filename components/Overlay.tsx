@@ -28,7 +28,7 @@ export const Overlay: React.FC<OverlayProps> = ({ onNavigate }) => {
                 <div className="w-full flex flex-col items-center justify-center">
                     {/* Title is now 3D in the scene */}
                     {/* Placeholder for spacing relative to 3D text. Increased height to push text down. */}
-                    <div className="h-64 md:h-56" /> 
+                    <div className="h-72 md:h-64" /> 
                     <motion.p 
                         id="hero-slogan-anchor"
                         className="text-xl md:text-2xl text-gray-300 leading-relaxed max-w-lg mx-auto font-medium tracking-wide"
