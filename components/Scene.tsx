@@ -151,15 +151,9 @@ const HeroComposition = () => {
         iridescenceIOR: 1.2,
         iridescenceThicknessRange: [0, 1400] as [number, number],
         roughness: 0.0,
-        metalness: 0.0,
         color: "#eef2ff",
-        emissive: new THREE.Color('#4466ff'),
-        emissiveIntensity: 0.3,
-        background: new THREE.Color('#1a1a2e'),
+        background: new THREE.Color('#000000'),
         toneMapped: false,
-        transmission: 0.95,
-        ior: 1.5,
-        opacity: 1.0,
     }), [isMobile, settings]);
     
     useFrame((state) => {
@@ -506,14 +500,7 @@ export const PrismaticArtifact = () => {
                     distortion={0.5}
                     iridescence={1}
                     roughness={0.1}
-                    metalness={0.0}
                     color="#e0e0ff"
-                    emissive={new THREE.Color('#6677ff')}
-                    emissiveIntensity={0.25}
-                    background={new THREE.Color('#1a1a2e')}
-                    transmission={0.95}
-                    ior={1.5}
-                    opacity={1.0}
                 />
             </mesh>
         </group>
@@ -859,31 +846,14 @@ export const AmbientScene = () => {
     );
 };
 
-const BackgroundSphere = () => {
-    return (
-        <mesh position={[0, 0, 0]} scale={[1, 1, 1]}>
-            <sphereGeometry args={[100, 32, 32]} />
-            <meshBasicMaterial
-                color="#0a0a15"
-                side={THREE.BackSide}
-                toneMapped={false}
-            />
-        </mesh>
-    );
-};
-
 export const SceneWrapper = ({ mode, onNavigate }: { mode: 'HOME' | 'AMBIENT', onNavigate?: (view: ViewState) => void }) => {
     return (
         <>
             <color attach="background" args={['#050505']} />
-            <BackgroundSphere />
-            <ambientLight intensity={2.5} />
-            <directionalLight position={[10, 10, 10]} intensity={3} color="#ffffff" />
-            <directionalLight position={[-10, -10, -10]} intensity={2} color="#ffffff" />
-            <directionalLight position={[0, 10, 0]} intensity={2} color="#ffffff" />
-            <pointLight position={[0, 0, 10]} intensity={3} color="#ffffff" distance={50} />
-            <pointLight position={[0, 0, -10]} intensity={3} color="#ffffff" distance={50} />
-            <hemisphereLight args={['#ffffff', '#888888', 1.5]} />
+            <ambientLight intensity={0.8} />
+            <directionalLight position={[5, 5, 5]} intensity={1.2} />
+            <directionalLight position={[-5, -5, -5]} intensity={0.5} />
+            <hemisphereLight args={['#ffffff', '#444444', 0.6]} />
 
             {mode === 'HOME' ? <HomeScene onNavigate={onNavigate} /> : <AmbientScene />}
         </>
