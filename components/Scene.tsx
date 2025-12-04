@@ -112,10 +112,10 @@ const HeroComposition = () => {
 
     // --- Responsive Configuration ---
 
-    // Size: Maintain consistent sphere-to-text ratio across devices
+    // Size: Larger sphere on desktop for dramatic depth effect
     // Mobile: 0.45 sphere with ~0.72 text (width * 0.18 when width ≈ 4) = ratio ~0.625
-    // Desktop: 0.9 text * 0.625 ratio = 0.56 sphere
-    const sphereStartScale = isMobile ? 0.45 : 0.60; 
+    // Desktop: 0.80 for prominent presence in the background
+    const sphereStartScale = isMobile ? 0.45 : 0.80; 
     
     // Text Size: Adjusted to ensure it fits on screen without cutoff
     const textSize = isMobile ? width * 0.18 : 0.9;
@@ -193,27 +193,31 @@ const HeroComposition = () => {
                 sphereRef.current.rotation.z = ease * Math.PI * 0.5;
 
             } else {
-                // ** Desktop: Liquid Absorption Animation with Vertical Layout **
+                // ** Desktop: Ethereal Depth-based Absorption Animation **
 
                 // Define specific scroll range for the absorption event
                 const absorptionProgress = scroll.range(0, 1.5 / TOTAL_PAGES);
                 const absorbEase = THREE.MathUtils.smoothstep(absorptionProgress, 0, 1);
                 const absorbAggressive = Math.pow(absorbEase, 3);
 
-                // 1. Sphere Position: Vertical layout (sphere at top)
+                // 1. Sphere Position: Positioned in the background depth
                 const startY = sphereStartY;
-                const targetSphereY = textY; // Move down towards text position
+                const targetSphereY = textY; // Align with text center during absorption
                 const currentY = THREE.MathUtils.lerp(startY, targetSphereY, absorbEase);
-                const currentZ = THREE.MathUtils.lerp(0, 1.0, absorbEase);
+
+                // Depth: Sphere starts far in the background and moves slightly forward
+                const sphereStartZ = -3.0; // Deep in the background
+                const sphereEndZ = -1.5; // Closer but still behind text
+                const currentZ = THREE.MathUtils.lerp(sphereStartZ, sphereEndZ, absorbEase);
 
                 // Idle Floating
                 const floatY = Math.sin(time * 0.45) * 0.08 + Math.cos(time * 0.25) * 0.04;
                 const floatX = Math.cos(time * 0.35) * 0.04;
 
-                // Mouse Parallax (Reduced during absorption to keep focus)
-                const mouseInfluence = THREE.MathUtils.lerp(0.2, 0.05, absorbEase);
-                const parallaxX = mouse.x * mouseInfluence * 0.2;
-                const parallaxY = mouse.y * mouseInfluence * 0.2;
+                // Mouse Parallax with depth effect (stronger parallax for background elements)
+                const mouseInfluence = THREE.MathUtils.lerp(0.3, 0.08, absorbEase);
+                const parallaxX = mouse.x * mouseInfluence * 0.3;
+                const parallaxY = mouse.y * mouseInfluence * 0.3;
 
                 sphereRef.current.position.set(
                     floatX + parallaxX,
@@ -222,7 +226,7 @@ const HeroComposition = () => {
                 );
 
                 // 2. Sphere Growth (Absorbing Energy)
-                const targetScale = 2.5;
+                const targetScale = 2.8; // Slightly larger for dramatic effect
                 const growthCurve = THREE.MathUtils.smoothstep(absorptionProgress, 0.1, 0.9);
                 const currentScale = THREE.MathUtils.lerp(sphereStartScale, targetScale, growthCurve);
                 sphereRef.current.scale.setScalar(currentScale);
@@ -248,15 +252,19 @@ const HeroComposition = () => {
                     sphereMatRef.current.thickness = 1.2 + Math.cos(time * 0.7) * 0.5;
                 }
 
-                // --- Text Behavior (Absorbed upwards) ---
+                // --- Text Behavior (Sucked into the background sphere) ---
                 if (textGroupRef.current) {
-                    // 1. Move into the Sphere (from bottom to top)
+                    // 1. Move into the Sphere (vertical and depth movement)
                     const textStartY = textY;
                     const textEndY = targetSphereY;
 
+                    // Text starts in front (Z=0) and gets sucked into the sphere's depth
+                    const textStartZ = 0.5; // In front of viewer
+                    const textEndZ = sphereEndZ - 0.5; // Deep into the sphere
+
                     const moveEase = Math.pow(absorbEase, 2);
 
-                    // 2. Scale (Sucked in)
+                    // 2. Scale (Sucked in and shrinks with perspective)
                     const scaleEase = Math.pow(absorbEase, 4);
                     const currentTextScale = THREE.MathUtils.lerp(1, 0, scaleEase);
 
@@ -265,24 +273,25 @@ const HeroComposition = () => {
                     const tFloatY = (Math.sin(time * 0.5) * 0.1) * floatDampen;
                     const tFloatX = (Math.cos(time * 0.4) * 0.05) * floatDampen;
 
-                    // 4. Position Update (vertical movement)
+                    // 4. Position Update (vertical and depth movement)
                     textGroupRef.current.position.set(
                         tFloatX,
                         THREE.MathUtils.lerp(textStartY, textEndY, moveEase) + tFloatY,
-                        THREE.MathUtils.lerp(0, -2, absorbEase)
+                        THREE.MathUtils.lerp(textStartZ, textEndZ, absorbAggressive) // Aggressive depth pull
                     );
 
                     textGroupRef.current.scale.setScalar(currentTextScale);
 
-                    // 5. Rotation
-                    textGroupRef.current.rotation.y = THREE.MathUtils.lerp(0, Math.PI, moveEase);
+                    // 5. Rotation (Spiral into the sphere)
+                    textGroupRef.current.rotation.y = THREE.MathUtils.lerp(0, Math.PI * 1.5, moveEase);
+                    textGroupRef.current.rotation.x = THREE.MathUtils.lerp(0, Math.PI / 6, moveEase);
                     textGroupRef.current.rotation.z = THREE.MathUtils.lerp(0, -Math.PI / 4, moveEase);
 
-                    // 6. Text Material (Liquify)
+                    // 6. Text Material (Liquify and dissolve)
                     if (textMatRef.current) {
-                        textMatRef.current.distortion = THREE.MathUtils.lerp(0.4, 4.0, moveEase);
+                        textMatRef.current.distortion = THREE.MathUtils.lerp(0.4, 4.5, moveEase);
                         textMatRef.current.thickness = THREE.MathUtils.lerp(1.5, 0.0, moveEase);
-                        textMatRef.current.chromaticAberration = THREE.MathUtils.lerp(1.0, 5.0, moveEase);
+                        textMatRef.current.chromaticAberration = THREE.MathUtils.lerp(1.0, 6.0, moveEase);
                         textMatRef.current.opacity = THREE.MathUtils.lerp(1.0, 0.0, moveEase);
                     }
                 }
@@ -306,7 +315,7 @@ const HeroComposition = () => {
                 {/* The Sphere */}
                 <mesh
                     ref={sphereRef}
-                    position={[0, sphereStartY, 0]}
+                    position={[0, sphereStartY, isMobile ? 0 : -3.0]}
                 >
                     <sphereGeometry args={[1, 32, 32]} />
                     <MeshTransmissionMaterial
@@ -318,7 +327,7 @@ const HeroComposition = () => {
                 {/* The Text */}
                 <group
                     ref={textGroupRef}
-                    position={[0, textY, 0]}
+                    position={[0, textY, isMobile ? 0 : 0.5]}
                 >
                     {/* Dynamic Lighting for both Mobile and Desktop to ensure consistent design */}
                     <pointLight position={[-2, 1, 2]} intensity={isMobile ? 8 : 10} color="#ffaaee" distance={5} />
