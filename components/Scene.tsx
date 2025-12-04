@@ -382,7 +382,8 @@ const HeroComposition = () => {
 // Desktop Product Object with cursor-following animation
 const DesktopProductObject = () => {
     const groupRef = useRef<THREE.Group>(null);
-    const { height, mouse } = useThree((state) => state);
+    const { height } = useThree((state) => state.viewport);
+    const { mouse } = useThree((state) => state);
 
     useFrame((state) => {
         if (groupRef.current) {
