@@ -380,7 +380,7 @@ const HeroComposition = () => {
 };
 
 // Desktop Product Panel - Cursor-following floating panel
-export const DesktopProductPanel = () => {
+const DesktopProductPanelInner = () => {
     const groupRef = useRef<THREE.Group>(null);
     const materialRef = useRef<THREE.MeshStandardMaterial>(null);
     const { height, mouse } = useThree((state) => state);
@@ -397,7 +397,7 @@ export const DesktopProductPanel = () => {
         const parallaxX = mouse.x * 0.15; // Reduced influence for subtle effect
         const parallaxY = mouse.y * 0.1;
 
-        groupRef.current.position.set(parallaxX, hoverY + parallaxY, -1.5);
+        groupRef.current.position.set(parallaxX, hoverY + parallaxY, 0);
 
         // Slow, majestic rotation
         groupRef.current.rotation.x = Math.cos(time * 0.2) * 0.05;
@@ -406,7 +406,7 @@ export const DesktopProductPanel = () => {
     });
 
     return (
-        <group position={[-1.0, POS_PRODUCTS * height, 0]}>
+        <group position={[-1.2, POS_PRODUCTS * height, 0]}>
             {/* Background Stars */}
             <Sparkles count={60} scale={8} size={4} speed={0.2} opacity={0.5} color="#ffffff" />
             <Float speed={0.3} rotationIntensity={0.2} floatIntensity={0.2}>
@@ -418,7 +418,7 @@ export const DesktopProductPanel = () => {
             <pointLight position={[-3, -2, -4]} intensity={1.5} color="#ff9900" distance={10} />
 
             {/* The Holographic Image Panel */}
-            <group ref={groupRef} position={[0, 0, -1.5]}>
+            <group ref={groupRef} position={[0, 0, 0]}>
                 <mesh>
                     <boxGeometry args={[2.8, 3.6, 0.1]} />
                     <meshStandardMaterial
@@ -435,6 +435,14 @@ export const DesktopProductPanel = () => {
                 </mesh>
             </group>
         </group>
+    );
+};
+
+export const DesktopProductPanel = () => {
+    return (
+        <React.Suspense fallback={null}>
+            <DesktopProductPanelInner />
+        </React.Suspense>
     );
 };
 
