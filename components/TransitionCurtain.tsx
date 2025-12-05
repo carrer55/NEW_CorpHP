@@ -113,7 +113,7 @@ export const TransitionCurtain: React.FC<TransitionCurtainProps> = ({ isVisible,
                             >
                                 <div className="flex items-center gap-4 mb-2">
                                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-pulse" />
-                                    <div className="font-mono text-xs text-gray-400 tracking-[0.3em] uppercase">Target System</div>
+                                    <div className="font-mono text-xs text-gray-400 tracking-[0.3em] uppercase">Perception Engine</div>
                                 </div>
                                 <div className="text-5xl md:text-8xl font-display font-bold text-white tracking-widest uppercase relative mix-blend-screen px-4 text-center">
                                     {/* Set fixed duration to ensure consistent transition timing regardless of text length */}
