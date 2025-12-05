@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://dotfound.co.jp/sitemap.xml
