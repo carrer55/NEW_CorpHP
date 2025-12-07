@@ -19,9 +19,10 @@
   <!-- =============================================== -->
   <!-- ファビコン -->
   <!-- =============================================== -->
-  <link rel="icon" type="image/png" href="/dot.favicon.png">
-  <link rel="shortcut icon" type="image/png" href="/dot.favicon.png">
-  <link rel="apple-touch-icon" href="/dot.favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/dot.favicon_(16×16).png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/dot.favicon_(32×32).png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/dot.favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/dot.favicon_(180×180).png">
   <link rel="manifest" href="/site.webmanifest">
 
   <!-- =============================================== -->
@@ -80,6 +81,18 @@
   <meta name="apple-mobile-web-app-title" content=".Found Inc.">
 
   <!-- =============================================== -->
+  <!-- Google Analytics -->
+  <!-- =============================================== -->
+  <!-- TODO: Replace 'G-XXXXXXXXXX' with your actual Google Analytics ID -->
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script> -->
+
+  <!-- =============================================== -->
   <!-- 構造化データ（JSON-LD）-->
   <!-- =============================================== -->
   <script type="application/ld+json">
@@ -89,7 +102,6 @@
     "name": "株式会社ドットファウンド",
     "alternateName": ".Found Inc.",
     "url": "https://www.dotfound.co.jp",
-    "logo": "https://www.dotfound.co.jp/logo.png",
     "description": "株式会社ドットファウンドは、AI・テクノロジーの力で人の心を起点とした革新的なソリューションを提供します。",
     "foundingDate": "2025-10",
     "founders": [
@@ -113,11 +125,6 @@
       "email": "support@dotfound.co.jp",
       "availableLanguage": ["Japanese"]
     },
-    "sameAs": [
-      "https://twitter.com/dotfound_inc",
-      "https://www.facebook.com/dotfound",
-      "https://www.linkedin.com/company/dotfound"
-    ],
     "areaServed": {
       "@type": "Place",
       "name": "日本"
@@ -154,46 +161,9 @@
   <!-- =============================================== -->
   <!-- パフォーマンス最適化 -->
   <!-- =============================================== -->
-  <link rel="preload" href="/fonts/syne-bold.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
 
-  <!-- =============================================== -->
-  <!-- Tailwind CSS -->
-  <!-- =============================================== -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- =============================================== -->
-  <!-- スタイル -->
-  <!-- =============================================== -->
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #050505;
-      color: #ffffff;
-      font-family: 'Inter', sans-serif;
-      overflow: hidden;
-    }
-    ::-webkit-scrollbar {
-      display: none;
-    }
-    html {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
-    .font-display {
-      font-family: 'Syne', sans-serif;
-    }
-
-    .font-goudy {
-      font-family: 'Goudy Old Style', 'Goudy', 'Sorts Mill Goudy', serif;
-    }
-
-    canvas {
-      touch-action: none;
-    }
-  </style>
 </head>
 <body>
   <div id="root"></div>

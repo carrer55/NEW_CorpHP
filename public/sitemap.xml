@@ -11,13 +11,13 @@
     ハッシュフラグメント（#product、#aboutなど）は検索エンジンによって
     無視されるため、含めていません。
 
-    最終更新：2025-12-07
+    最終更新：2024-12-07
   -->
 
   <!-- メインページ（ホーム） -->
   <url>
     <loc>https://www.dotfound.co.jp/</loc>
-    <lastmod>2025-12-07</lastmod>
+    <lastmod>2024-12-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
