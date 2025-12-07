@@ -1,44 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 
-  <!-- ホームページ -->
+  <!--
+    株式会社ドットファウンド コーポレートサイト Sitemap
+
+    注記：このサイトはSPA（Single Page Application）として構築されているため、
+    検索エンジンがクロール可能なメインURLのみを記載しています。
+    ハッシュフラグメント（#product、#aboutなど）は検索エンジンによって
+    無視されるため、含めていません。
+
+    最終更新：2025-12-07
+  -->
+
+  <!-- メインページ（ホーム） -->
   <url>
     <loc>https://www.dotfound.co.jp/</loc>
-    <lastmod>2025-01-15</lastmod>
+    <lastmod>2025-12-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-  </url>
-
-  <!-- プロダクトページ -->
-  <url>
-    <loc>https://www.dotfound.co.jp/#product</loc>
-    <lastmod>2025-01-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- About Usページ -->
-  <url>
-    <loc>https://www.dotfound.co.jp/#about</loc>
-    <lastmod>2025-01-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Contactページ -->
-  <url>
-    <loc>https://www.dotfound.co.jp/#contact</loc>
-    <lastmod>2025-01-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <!-- Privacy Policyページ -->
-  <url>
-    <loc>https://www.dotfound.co.jp/#privacy</loc>
-    <lastmod>2025-01-15</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
+    <image:image>
+      <image:loc>https://www.dotfound.co.jp/ogp(1200_x_630px).jpeg</image:loc>
+      <image:title>株式会社ドットファウンド</image:title>
+      <image:caption>AI・テクノロジーで未来を創る</image:caption>
+    </image:image>
   </url>
 
 </urlset>
