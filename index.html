@@ -1,45 +1,203 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Aetheria | Immersive 3D</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sorts+Mill+Goudy&family=Syne:wght@400;700;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        background-color: #050505;
-        color: #ffffff;
-        font-family: 'Inter', sans-serif;
-        overflow: hidden;
-      }
-      ::-webkit-scrollbar {
-        display: none;
-      }
-      html {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
+<html lang="ja">
+<head>
+  <!-- =============================================== -->
+  <!-- 必須の基本設定 -->
+  <!-- =============================================== -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-      .font-display {
-        font-family: 'Syne', sans-serif;
-      }
+  <!-- =============================================== -->
+  <!-- SEO基本設定 -->
+  <!-- =============================================== -->
+  <title>株式会社ドットファウンド（.Found Inc.）</title>
+  <meta name="description" content="株式会社ドットファウンドは、AI・テクノロジーの力で人の心を起点とした革新的なソリューションを提供します。静岡県富士宮市発のテックカンパニー。">
+  <meta name="keywords" content="ドットファウンド,Found Inc,.Found,SaaS,AI,生成AI,受託開発,HP制作,WEBアプリ開発,賢者の精算,AI派遣社員,JOBchain,富士宮,静岡,テックカンパニー">
+  <meta name="author" content="株式会社ドットファウンド">
 
-      .font-goudy {
-        font-family: 'Goudy Old Style', 'Goudy', 'Sorts Mill Goudy', serif;
-      }
+  <!-- =============================================== -->
+  <!-- ファビコン -->
+  <!-- =============================================== -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
 
-      canvas {
-        touch-action: none;
+  <!-- =============================================== -->
+  <!-- OGP設定（SNSシェア用）-->
+  <!-- =============================================== -->
+  <meta property="og:title" content="株式会社ドットファウンド（.Found Inc.）">
+  <meta property="og:description" content="株式会社ドットファウンドは、AI・テクノロジーの力で人の心を起点とした革新的なソリューションを提供します。静岡県富士宮市発のテックカンパニー。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.dotfound.co.jp">
+  <meta property="og:image" content="https://www.dotfound.co.jp/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="株式会社ドットファウンド - AI・テクノロジーで未来を創る">
+  <meta property="og:site_name" content="株式会社ドットファウンド">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="株式会社ドットファウンド（.Found Inc.）">
+  <meta name="twitter:description" content="株式会社ドットファウンドは、AI・テクノロジーの力で人の心を起点とした革新的なソリューションを提供します。静岡県富士宮市発のテックカンパニー。">
+  <meta name="twitter:image" content="https://www.dotfound.co.jp/og-image.jpg">
+  <meta name="twitter:image:alt" content="株式会社ドットファウンド - AI・テクノロジーで未来を創る">
+
+  <!-- =============================================== -->
+  <!-- 検索エンジンの指示 -->
+  <!-- =============================================== -->
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="https://www.dotfound.co.jp">
+
+  <!-- =============================================== -->
+  <!-- 地域情報（ローカルSEO）-->
+  <!-- =============================================== -->
+  <meta name="geo.region" content="JP-22">
+  <meta name="geo.placename" content="富士宮市">
+  <meta name="geo.position" content="35.2204;138.6221">
+  <meta name="ICBM" content="35.2204, 138.6221">
+
+  <!-- =============================================== -->
+  <!-- 連絡先情報 -->
+  <!-- =============================================== -->
+  <meta property="business:contact_data:street_address" content="大宮町31 澤田ビル 2F">
+  <meta property="business:contact_data:locality" content="富士宮市">
+  <meta property="business:contact_data:region" content="静岡県">
+  <meta property="business:contact_data:postal_code" content="418-0066">
+  <meta property="business:contact_data:country_name" content="日本">
+  <meta property="business:contact_data:email" content="support@dotfound.co.jp">
+  <meta property="business:contact_data:phone_number" content="090-1286-0467">
+
+  <!-- =============================================== -->
+  <!-- その他の設定 -->
+  <!-- =============================================== -->
+  <meta name="theme-color" content="#050505">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content=".Found Inc.">
+
+  <!-- =============================================== -->
+  <!-- 構造化データ（JSON-LD）-->
+  <!-- =============================================== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "株式会社ドットファウンド",
+    "alternateName": ".Found Inc.",
+    "url": "https://www.dotfound.co.jp",
+    "logo": "https://www.dotfound.co.jp/logo.png",
+    "description": "株式会社ドットファウンドは、AI・テクノロジーの力で人の心を起点とした革新的なソリューションを提供します。",
+    "foundingDate": "2025-10",
+    "founders": [
+      {
+        "@type": "Person",
+        "name": "田中 心也"
       }
-    </style>
+    ],
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "大宮町31 澤田ビル 2F",
+      "addressLocality": "富士宮市",
+      "addressRegion": "静岡県",
+      "postalCode": "418-0066",
+      "addressCountry": "JP"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+81-90-1286-0467",
+      "contactType": "Customer Service",
+      "email": "support@dotfound.co.jp",
+      "availableLanguage": ["Japanese"]
+    },
+    "sameAs": [
+      "https://twitter.com/dotfound_inc",
+      "https://www.facebook.com/dotfound",
+      "https://www.linkedin.com/company/dotfound"
+    ],
+    "areaServed": {
+      "@type": "Place",
+      "name": "日本"
+    },
+    "brand": {
+      "@type": "Brand",
+      "name": ".Found Inc."
+    },
+    "knowsAbout": ["SaaS", "AI", "生成AI", "WEB開発", "受託開発", "HP制作"]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "株式会社ドットファウンド",
+    "url": "https://www.dotfound.co.jp",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://www.dotfound.co.jp/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
+  <!-- =============================================== -->
+  <!-- フォント読み込み -->
+  <!-- =============================================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sorts+Mill+Goudy&family=Syne:wght@400;700;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- =============================================== -->
+  <!-- パフォーマンス最適化 -->
+  <!-- =============================================== -->
+  <link rel="preload" href="/fonts/syne-bold.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+  <!-- =============================================== -->
+  <!-- Tailwind CSS -->
+  <!-- =============================================== -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- =============================================== -->
+  <!-- スタイル -->
+  <!-- =============================================== -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #050505;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    html {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .font-display {
+      font-family: 'Syne', sans-serif;
+    }
+
+    .font-goudy {
+      font-family: 'Goudy Old Style', 'Goudy', 'Sorts Mill Goudy', serif;
+    }
+
+    canvas {
+      touch-action: none;
+    }
+  </style>
 </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
 </html>
